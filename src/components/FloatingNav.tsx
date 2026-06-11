@@ -1,65 +1,51 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, useScroll } from "framer-motion";
+import { identity } from "../data/content";
 
-const navItems = [
-  { label: "Projects", href: "#projects" },
-  { label: "Edge", href: "#edge" },
-  { label: "Experience", href: "#experience" },
-  { label: "Contact", href: "#contact" },
+const links = [
+  { href: "#work", label: "Work" },
+  { href: "#wins", label: "Wins" },
+  { href: "#github", label: "GitHub" },
+  { href: "#log", label: "Log" },
+  { href: "#contact", label: "Contact" },
 ];
 
 export function FloatingNav() {
   const [scrolled, setScrolled] = useState(false);
+  const { scrollYProgress } = useScroll();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
-    <motion.nav
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, delay: 1.5, ease: [0.22, 1, 0.36, 1] }}
-      className={`nav-dock px-8 py-3 ${scrolled ? "scrolled" : ""}`}
-    >
-      <div className="flex items-center gap-8">
-        <span
-          className="text-xs font-bold tracking-[0.2em] text-white uppercase cursor-none"
-          style={{ letterSpacing: "0.2em" }}
-        >
-          SP
-        </span>
-        <div className="w-px h-4 bg-white/10" />
-        <div className="flex items-center gap-6">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              data-magnetic
-              onClick={(e) => handleClick(e, item.href)}
-              className="text-[0.7rem] tracking-[0.15em] uppercase text-white/50 hover:text-white/90 transition-colors duration-300 font-medium cursor-none"
-            >
-              {item.label}
+    <header className={`nav-rail ${scrolled ? "scrolled" : ""}`}>
+      <div className="max-w-[1600px] mx-auto px-6 md:px-16 flex items-center justify-between h-16">
+        <a href="#top" data-magnetic className="font-mono text-sm font-bold tracking-tight" style={{ color: "var(--ink)" }}>
+          SP<span style={{ color: "var(--acc)" }}>_</span>
+        </a>
+
+        <nav className="hidden md:flex items-center gap-10">
+          {links.map((link) => (
+            <a key={link.href} href={link.href} className="nav-link" data-magnetic>
+              {link.label}
             </a>
           ))}
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <span className="status-dot" />
+          <span className="mono-label" style={{ color: "var(--ink-dim)" }}>{identity.status}</span>
         </div>
-        <div className="w-px h-4 bg-white/10" />
-        <a
-          href="mailto:sriraj.paruchuru@gmail.com"
-          data-magnetic
-          className="text-[0.7rem] tracking-[0.15em] uppercase bg-white text-black px-4 py-1.5 font-semibold hover:bg-white/90 transition-colors cursor-none"
-        >
-          Hire Me
-        </a>
       </div>
-    </motion.nav>
+
+      {/* scroll progress */}
+      <motion.div
+        className="h-px origin-left"
+        style={{ scaleX: scrollYProgress, background: "var(--acc)" }}
+      />
+    </header>
   );
 }

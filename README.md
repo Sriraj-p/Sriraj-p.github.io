@@ -1,58 +1,57 @@
 # Sriraj Paruchuru — Portfolio
 
-A high-fidelity personal portfolio site built with React, TypeScript, Framer Motion, and GSAP.
+Live at **[sriraj-p.github.io](https://sriraj-p.github.io)** — an "AI systems lab" themed portfolio: near-black canvas, electric chartreuse accent, neural-mesh hero, scroll-driven project deck, live GitHub data, and a working terminal easter egg (press <kbd>`</kbd>).
 
 ## Stack
 
-- **React 18** + **TypeScript**
-- **Vite** for dev/build
-- **Framer Motion** for scroll animations and entrance effects
-- **GSAP** for cursor glow tracking
-- **Tailwind CSS** for utility styling
-- **Wouter** for routing
+- **React 18** + **TypeScript** + **Vite**
+- **Framer Motion** — scroll-driven card stack, kinetic type, entrance animations
+- **Canvas 2D** — interactive neural-mesh hero (no WebGL dependency)
+- **Tailwind CSS** + CSS custom properties for the design system
 
-## Getting Started
+## Editing content
+
+All copy lives in **`src/data/content.ts`** — identity, bio, projects, hackathon wins, experience, marquee. Edit that one file; no component changes needed.
+
+## Adding the headshot
+
+Drop a portrait photo at **`public/headshot.jpg`** (4:5 ratio works best). Until it exists, the About section shows a styled S/P monogram fallback.
+
+## Commands
 
 ```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+npm install        # install dependencies
+npm run dev        # dev server at http://localhost:5173
+npm run build      # type-check + production build to dist/
+npm run deploy     # build and publish dist/ to the gh-pages branch
 ```
 
-The site will be at `http://localhost:5173`
+GitHub Pages serves the `gh-pages` branch, so `npm run deploy` is what updates the live site.
 
-## Project Structure
+## Structure
 
 ```
 src/
+  data/content.ts        — ALL site copy (single source of truth)
   components/
-    HeroSection.tsx       — Shatter-text hero with mouse-tracked glow
-    FloatingNav.tsx       — Fixed top nav with blur backdrop
-    ProjectVault.tsx      — 5 projects with hover code previews
-    CompetitiveEdge.tsx   — Hackathon cards + capabilities grid
-    ExperienceLog.tsx     — Timeline: Norstella, UoB MSc, VIT
-    ContactSection.tsx    — CTA + links
-    MagneticCursor.tsx    — Custom cursor with magnetic ring
-  hooks/
-    useMagneticCursor.ts  — RAF-based cursor tracking logic
-  pages/
-    Portfolio.tsx         — Assembles all sections
-  App.tsx
-  main.tsx
-  index.css              — Global styles, CSS custom properties
+    BootIntro.tsx        — terminal-style boot sequence (once per session)
+    NeuralCanvas.tsx     — mouse-reactive particle mesh
+    HeroSection.tsx      — kinetic name, role rotator, headline stats
+    FloatingNav.tsx      — top rail with scroll progress bar
+    Marquee.tsx          — angled chartreuse achievement ticker
+    About.tsx            — headshot + bio + facts + stacks
+    ProjectStack.tsx     — sticky deck-of-cards project showcase
+    Recognition.tsx      — trophy cabinet, champion card
+    GitHubLive.tsx       — live contribution heatmap + recent repos
+    ExperienceLog.tsx    — timeline
+    ContactSection.tsx   — CTA
+    Terminal.tsx         — interactive shell (` key or button)
+    MagneticCursor.tsx   — custom cursor (pointer devices only)
+  pages/Portfolio.tsx    — assembles all sections
 ```
 
 ## Notes
 
-- Custom cursor replaces the system cursor (`cursor: none` on body)
-- All sections use `useInView` for scroll-triggered entrance animations
-- The `data-magnetic` attribute on interactive elements triggers cursor ring expansion
-- Google Fonts (Inter + JetBrains Mono) loaded via `index.html`
+- GitHub data is fetched client-side at runtime (github.com REST + jogruber contributions API) with graceful fallbacks — no tokens, no build step.
+- `prefers-reduced-motion` is respected: boot intro skips, marquee and canvas animation stop.
+- Custom cursor only activates on `pointer: fine` devices; touch gets the system default.

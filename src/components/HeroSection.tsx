@@ -1,172 +1,141 @@
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import gsap from "gsap";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { NeuralCanvas } from "./NeuralCanvas";
+import { identity } from "../data/content";
 
-const firstName = "SRIRAJ";
-const lastName = "PARUCHURU";
-
-function ShatterText({ text, delay = 0 }: { text: string; delay?: number }) {
-  const chars = text.split("");
+function KineticText({ text, delay = 0, className = "" }: { text: string; delay?: number; className?: string }) {
   return (
-    <span className="inline-flex">
-      {chars.map((char, i) => (
+    <span className={`inline-flex ${className}`}>
+      {text.split("").map((char, i) => (
         <motion.span
           key={i}
           className="hero-char"
-          initial={{
-            y: char === " " ? 0 : Math.random() > 0.5 ? -120 : 120,
-            opacity: 0,
-            rotateX: Math.random() > 0.5 ? 90 : -90,
-            scaleY: 0.3,
-          }}
-          animate={{ y: 0, opacity: 1, rotateX: 0, scaleY: 1 }}
-          transition={{
-            duration: 0.9,
-            delay: delay + i * 0.04,
-            ease: [0.22, 1, 0.36, 1],
-          }}
+          initial={{ y: "110%", rotateX: -80, opacity: 0 }}
+          animate={{ y: "0%", rotateX: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: delay + i * 0.035, ease: [0.22, 1, 0.36, 1] }}
         >
-          {char === " " ? "\u00A0" : char}
+          {char === " " ? " " : char}
         </motion.span>
       ))}
     </span>
   );
 }
 
-export function HeroSection() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-
+function RoleRotator() {
+  const [index, setIndex] = useState(0);
   useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = hero.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-
-      if (glowRef.current) {
-        gsap.to(glowRef.current, {
-          left: `${x * 100}%`,
-          top: `${y * 100}%`,
-          duration: 1.2,
-          ease: "power2.out",
-        });
-      }
-    };
-
-    hero.addEventListener("mousemove", handleMouseMove);
-    return () => hero.removeEventListener("mousemove", handleMouseMove);
+    const id = setInterval(() => setIndex((i) => (i + 1) % identity.roles.length), 2600);
+    return () => clearInterval(id);
   }, []);
 
   return (
-    <section
-      ref={heroRef}
-      className="section-full flex flex-col justify-center relative overflow-hidden grid-bg"
-      style={{ minHeight: "100vh", paddingTop: "80px" }}
-    >
-      {/* Ambient glow */}
+    <span className="inline-block relative h-[1.4em] overflow-hidden align-bottom" style={{ minWidth: "12ch" }}>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={index}
+          initial={{ y: "100%", opacity: 0 }}
+          animate={{ y: "0%", opacity: 1 }}
+          exit={{ y: "-100%", opacity: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="serif-it block whitespace-nowrap"
+          style={{ color: "var(--acc)" }}
+        >
+          {identity.roles[index]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  );
+}
+
+const heroStats = [
+  { value: "1st", label: "Boffin's Den · Champion + MVP" },
+  { value: "5th/40+", label: "Agentic AI Hackathon · Solo" },
+  { value: "4th/15", label: "Google AI Playground · London" },
+];
+
+export function HeroSection() {
+  return (
+    <section id="top" className="relative min-h-screen flex flex-col justify-center overflow-hidden">
+      <NeuralCanvas />
+      {/* bottom fade into next section */}
       <div
-        ref={glowRef}
-        className="absolute pointer-events-none"
-        style={{
-          width: "600px",
-          height: "600px",
-          borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 70%)",
-          transform: "translate(-50%, -50%)",
-          left: "50%",
-          top: "50%",
-        }}
+        className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
+        style={{ background: "linear-gradient(transparent, var(--bg))" }}
       />
 
-      <div className="max-w-[1600px] mx-auto px-8 md:px-16 w-full">
-        {/* Section label */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex items-center gap-4 mb-12"
-        >
-          <span className="section-label">Portfolio 2025</span>
-          <div className="h-px flex-1 max-w-16 bg-white/10" />
-        </motion.div>
-
-        {/* Main headline */}
-        <div className="mb-8 overflow-hidden">
-          <h1 className="heading-xl text-white block leading-none">
-            <ShatterText text={firstName} delay={0.4} />
-          </h1>
-          <h1 className="heading-xl text-white block leading-none" style={{ WebkitTextStroke: "1px rgba(255,255,255,0.3)", color: "transparent" }}>
-            <ShatterText text={lastName} delay={0.7} />
-          </h1>
-        </div>
-
-        {/* Sub headline */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.3, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col md:flex-row md:items-end justify-between gap-8"
-        >
-          <div>
-            <p className="text-white/60 text-lg md:text-xl font-light tracking-wide mb-2">
-              Master's in AI & ML
-            </p>
-            <p className="text-white/40 text-base md:text-lg font-light tracking-wide">
-              Full-Stack Architect
-            </p>
-          </div>
-
-          <div className="flex items-center gap-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 1.6 }}
-              className="text-right"
-            >
-              <div className="text-4xl font-black text-white">94.1%</div>
-              <div className="text-white/30 text-xs tracking-[0.2em] uppercase mt-1">Model Accuracy</div>
-            </motion.div>
-            <div className="w-px h-12 bg-white/10" />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 1.7 }}
-              className="text-right"
-            >
-              <div className="text-4xl font-black text-white">78K</div>
-              <div className="text-white/30 text-xs tracking-[0.2em] uppercase mt-1">Transactions</div>
-            </motion.div>
-            <div className="w-px h-12 bg-white/10" />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 1.8 }}
-              className="text-right"
-            >
-              <div className="text-4xl font-black text-white">4th</div>
-              <div className="text-white/30 text-xs tracking-[0.2em] uppercase mt-1">Google AI London</div>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Scroll indicator */}
+      <div className="relative max-w-[1600px] mx-auto px-6 md:px-16 w-full pt-28 pb-24">
+        {/* top meta row */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 2.2 }}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3"
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="flex items-center justify-between mb-10 md:mb-14"
         >
-          <span className="section-label">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-            className="w-px h-12 bg-gradient-to-b from-white/40 to-transparent"
-          />
+          <span className="mono-label">
+            <span className="tick">●</span>&nbsp;&nbsp;AI/ML Engineer — {identity.location}
+          </span>
+          <span className="mono-label hidden md:block">SHIPPING SINCE 2024</span>
+        </motion.div>
+
+        {/* name */}
+        <h1 className="heading-giant block" style={{ perspective: "800px" }}>
+          <span className="block overflow-hidden pb-1">
+            <KineticText text={identity.firstName} delay={0.35} />
+          </span>
+          <span className="block overflow-hidden pb-2 outline-text">
+            <KineticText text={identity.lastName} delay={0.6} />
+          </span>
+        </h1>
+
+        {/* role line */}
+        <motion.p
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-8 md:mt-12 text-xl md:text-3xl font-light"
+          style={{ color: "var(--ink-dim)" }}
+        >
+          He <RoleRotator />
+          <span className="hidden sm:inline"> — end to end, idea to production.</span>
+        </motion.p>
+
+        {/* stats row */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mt-14 md:mt-20 grid grid-cols-1 sm:grid-cols-3 gap-px"
+          style={{ background: "var(--line-soft)", border: "1px solid var(--line-soft)" }}
+        >
+          {heroStats.map((stat, i) => (
+            <div key={stat.label} className="flex flex-col gap-2 p-6 md:p-8" style={{ background: "var(--bg)" }}>
+              <span
+                className="stat-num text-4xl md:text-5xl font-bold"
+                style={{ color: i === 0 ? "var(--acc)" : "var(--ink)" }}
+              >
+                {stat.value}
+              </span>
+              <span className="mono-label" style={{ letterSpacing: "0.18em" }}>{stat.label}</span>
+            </div>
+          ))}
         </motion.div>
       </div>
+
+      {/* scroll cue */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 2.1 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
+      >
+        <span className="mono-label">scroll</span>
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px h-10"
+          style={{ background: "linear-gradient(var(--acc-dim), transparent)" }}
+        />
+      </motion.div>
     </section>
   );
 }
