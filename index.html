@@ -2,166 +2,292 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Sriraj Paruchuru. Software engineer on the way to AI product management. Seven things I've built, each one something you can press.">
-<meta name="theme-color" content="#f7f7f4" id="themeColor">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Sriraj Paruchuru</title>
+<meta name="description" content="Sriraj Paruchuru. A working map of where I've been and where I'm headed. Walk it, or ask it, and every answer comes with receipts.">
+<meta name="theme-color" content="#dfe7ec" id="themeColor">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 :root{
-  --bg:#f7f7f4; --fg:#141414; --surf:#ffffff; --acc:#141414;
-  --mut:color-mix(in srgb,var(--fg) 64%,var(--bg)); --hair:color-mix(in srgb,var(--fg) 14%,transparent); --tint:color-mix(in srgb,var(--fg) 7%,transparent);
-  --font:"Host Grotesk",system-ui,sans-serif; --mono:ui-monospace,"Cascadia Mono",Consolas,monospace;
-  --gut:clamp(16px,4vw,56px); --max:1480px; --ease:cubic-bezier(.2,.8,.2,1);
+  --bg:#dfe7ec;--fg:#13212c;--surf:#f4f7f9;--acc:#2f6fb0;
+  --mut:color-mix(in srgb,var(--fg) 62%,var(--bg));--hair:color-mix(in srgb,var(--fg) 15%,transparent);--tint:color-mix(in srgb,var(--fg) 7%,transparent);
+  --ok:#2f8a57;--warn:#b8820a;--esc:#c2412d;
+  --font:"Host Grotesk",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);--gap:16px;--lpw:min(430px,33vw);--rpw:min(540px,37vw);
 }
-html{font-size:90%;-webkit-text-size-adjust:100%;overflow-x:clip;scroll-padding-top:70px}
+html,body{height:100%}
+html{font-size:90%;-webkit-text-size-adjust:100%}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:clip}
-a{color:inherit}button{font:inherit;color:inherit}img{display:block;max-width:100%}
-h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.03em;text-wrap:balance}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);line-height:1.55;-webkit-font-smoothing:antialiased;overflow:hidden;overscroll-behavior:none}
+a{color:inherit}button,input,select{font:inherit;color:inherit}img{display:block;max-width:100%}
+h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.035em;text-wrap:balance}
 p{margin:0}
-.wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gut)}
+.mono{font-family:var(--mono);font-size:.74rem;letter-spacing:.01em}
 :focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:8px}
+[hidden]{display:none!important}
 
-/* ---------- nav ---------- */
-.nav{position:fixed;inset:0 0 auto;z-index:60;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5)}
-.nav-in{max-width:var(--max);margin:0 auto;padding:0 var(--gut);height:56px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:650;font-size:1.02rem;white-space:nowrap}
-.brand img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 20%}
-.chap{color:var(--mut);font-weight:500;display:inline-block;height:1.4em;overflow:hidden;vertical-align:bottom}
-.chap span{display:block;transition:transform .45s var(--ease),opacity .35s}
-.chap span.out{transform:translateY(-100%);opacity:0}
-.chap span.pre{transform:translateY(100%);opacity:0;transition:none}
-.links{display:flex;gap:24px;align-items:center;font-size:.9rem}
-.links a{text-decoration:none;background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px;transition:background-size .3s var(--ease);padding-bottom:2px}
-.links a:hover{background-size:100% 1px}
-.links a.cta{background:var(--fg);color:var(--bg);padding:7px 15px;border-radius:99px}
-.prog{height:1px;background:var(--hair)}
-.prog i{display:block;height:100%;background:var(--fg);transform-origin:0 50%;transform:scaleX(0)}
-@media(max-width:820px){.links a:not(.cta){display:none}.chap{display:none}}
+#map{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;display:block}
+#pins{position:fixed;inset:0;pointer-events:none;z-index:5}
+.no-gl #map{display:none}
 
-/* ---------- dock ---------- */
-.dock{position:fixed;left:50%;bottom:18px;z-index:50;display:flex;align-items:center;gap:14px;padding:8px 8px 8px 18px;border-radius:99px;background:color-mix(in srgb,var(--surf) 60%,transparent);backdrop-filter:blur(20px) saturate(1.6);-webkit-backdrop-filter:blur(20px) saturate(1.6);box-shadow:0 10px 40px -12px rgba(0,0,0,.3),inset 0 0 0 1px color-mix(in srgb,var(--fg) 10%,transparent);transform:translateX(-50%);transition:transform .6s var(--ease),opacity .4s}
-.dock.hide{transform:translateX(-50%) translateY(150%);opacity:0;pointer-events:none}
-.d-name{font-weight:600;font-size:.88rem;min-width:8.5em;height:1.4em;overflow:hidden;position:relative}
-.d-name span{position:absolute;left:0;top:0;white-space:nowrap;transition:transform .45s var(--ease),opacity .35s}
-.d-name span.out{transform:translateY(-110%);opacity:0}
-.d-name span.pre{transform:translateY(110%);opacity:0;transition:none}
-.d-dots{display:flex;gap:6px;background:color-mix(in srgb,var(--fg) 6%,transparent);padding:6px;border-radius:99px}
-.d-dots button{width:22px;height:22px;border-radius:50%;border:0;cursor:pointer;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);position:relative;transition:transform .3s var(--ease)}
-.d-dots button:hover{transform:scale(1.15)}
-.d-dots button.on{box-shadow:inset 0 0 0 1px rgba(0,0,0,.14),0 0 0 2px var(--surf),0 0 0 3.5px var(--fg)}
-.d-dots button span{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%) translateY(4px);white-space:nowrap;font-size:.78rem;font-weight:600;background:var(--fg);color:var(--bg);padding:4px 9px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s,transform .3s var(--ease)}
-.d-dots button:hover span{opacity:1;transform:translateX(-50%)}
-@media(max-width:560px){.d-name{display:none}.dock{padding:6px}.d-dots{gap:4px}.d-dots button{width:19px;height:19px}}
+/* top bar */
+.top{position:fixed;left:var(--gap);right:var(--gap);top:var(--gap);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;pointer-events:none}
+.top>*{pointer-events:auto}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:650;white-space:nowrap;padding:6px 14px 6px 6px;border-radius:99px;background:color-mix(in srgb,var(--surf) 78%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px var(--hair)}
+.brand img{width:30px;height:30px;border-radius:50%;object-fit:cover;object-position:50% 20%}
+.modes{display:flex;gap:3px;padding:4px;border-radius:99px;background:color-mix(in srgb,var(--surf) 78%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px var(--hair)}
+.modes button{border:0;background:none;border-radius:99px;padding:8px 15px;font-weight:600;font-size:.9rem;cursor:pointer;white-space:nowrap;transition:background .3s,color .3s}
+.modes button:hover{background:var(--tint)}
+.modes button.on{background:var(--fg);color:var(--surf)}
+.modes .sm{display:none}
+@media(max-width:520px){.modes .lg{display:none}.modes .sm{display:inline}}
+.tr{display:flex;gap:8px}
+.pill{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:99px;padding:10px 16px;background:var(--fg);color:var(--surf);font-weight:600;font-size:.9rem;text-decoration:none;cursor:pointer;white-space:nowrap}
+.pill.ghost{background:color-mix(in srgb,var(--surf) 78%,transparent);color:var(--fg);box-shadow:inset 0 0 0 1px var(--hair);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+@media(max-width:1100px){.tr .ghost{display:none}}
 
-/* ---------- hero ---------- */
-.hero{min-height:100vh;min-height:100svh;display:grid;grid-template-rows:1fr auto;padding-top:96px}
-.hero-in{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(24px,5vw,80px);align-items:center}
-.hero h1{font-size:clamp(3.2rem,8vw,7rem);line-height:.92;letter-spacing:-.05em;font-weight:700}
-.lede{margin-top:26px;font-size:clamp(1.05rem,1.5vw,1.22rem);max-width:36em;color:var(--mut)}
-@media(min-width:900px){.lede{text-align:justify;text-align-last:left}}
-.lede b{color:var(--fg);font-weight:600;white-space:nowrap}
-.lede img{display:inline-block;width:1.7em;height:1.7em;border-radius:50%;object-fit:cover;object-position:50% 20%;vertical-align:-.5em;margin:0 .15em;box-shadow:0 0 0 2px var(--surf)}
-.sticks{display:flex;gap:9px;height:min(56vh,480px)}
-.stick{flex:1;border:0;border-radius:999px;background:var(--c);cursor:pointer;position:relative;overflow:hidden;transition:flex-grow .7s var(--ease),border-radius .7s var(--ease);display:flex;align-items:flex-end;justify-content:center;padding:0 0 22px;color:var(--t2);animation:rise 1s var(--ease) both;animation-delay:calc(var(--i) * 65ms)}
-@keyframes rise{from{transform:translateY(60%);opacity:0}}
-.stick span{writing-mode:vertical-rl;transform:rotate(180deg);font-weight:650;font-size:.92rem;white-space:nowrap;transition:opacity .3s}
-.stick em{position:absolute;left:24px;right:22px;top:24px;font-style:normal;font-size:.92rem;line-height:1.4;text-align:left;opacity:0;transform:translateY(8px);transition:opacity .3s,transform .5s var(--ease)}
-.stick em small{display:block;font-size:.78rem;font-weight:600;opacity:.62;margin-bottom:6px;white-space:nowrap}
-.stick em b{display:block;font-size:1.55rem;line-height:1.06;letter-spacing:-.03em;font-weight:700;margin-bottom:9px}
-.stick em q{display:block;quotes:none;opacity:.82}
-.stick .sa{position:absolute;left:8px;right:8px;bottom:14px;height:50%;opacity:0;transform:translateY(18px) scale(.97);transition:opacity .35s,transform .6s var(--ease);pointer-events:none;font-style:normal}
-.stick .sa svg{width:100%;height:100%;display:block}
-.stick:hover .sa,.stick:focus-visible .sa{opacity:1;transform:none;transition-delay:.25s}
-@media(max-width:900px){.stick .sa{display:none}}
-.sticks:hover .stick,.sticks:focus-within .stick{flex-grow:.75}
-.sticks .stick:hover,.sticks .stick:focus-visible{flex-grow:5;border-radius:30px}
-.stick:hover em,.stick:focus-visible em{opacity:1;transform:none;transition-delay:.2s}
-.stick:hover span,.stick:focus-visible span{opacity:0}
-.hero-foot{display:flex;justify-content:space-between;gap:20px;padding-block:28px 60px;color:var(--mut);font-size:.9rem;flex-wrap:wrap}
-@media(max-width:900px){.hero-in{grid-template-columns:1fr}.sticks{height:250px;gap:6px}.stick span{font-size:.78rem}.stick em{display:none}.sticks .stick:hover{flex-grow:1.4}}
+/* panels */
+.panel{position:fixed;z-index:20;top:calc(var(--gap) + 58px);bottom:var(--gap);border-radius:26px;background:color-mix(in srgb,var(--surf) 86%,transparent);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 30px 70px -40px rgba(0,0,0,.45),inset 0 0 0 1px var(--hair);display:flex;flex-direction:column;overflow:hidden;transition:transform .6s var(--ease),opacity .4s}
+.lp{left:var(--gap);width:var(--lpw)}
+.rp{right:var(--gap);width:var(--rpw)}
+.rp.off{transform:translateX(calc(100% + 40px));opacity:0;pointer-events:none}
+.scroll{flex:1;overflow:auto;overscroll-behavior:contain;padding:24px 24px 20px;scrollbar-width:thin}
+.fade-in{animation:fin .55s var(--ease)}
+@keyframes fin{from{opacity:0;transform:translateY(10px)}}
 
-.greet{text-align:right;max-width:40em}
-.greet .times{display:inline-block;margin-left:.6em;color:var(--fg);font-variant-numeric:tabular-nums;white-space:nowrap}
-.greet .times b{font-weight:600}
-@media(max-width:900px){.greet{text-align:left}.greet .times{display:block;margin:4px 0 0}}
+/* walk */
+.kick{display:flex;justify-content:space-between;gap:10px;color:var(--mut);margin-bottom:12px}
+.walk h1{font-size:clamp(2.8rem,4.4vw,4.4rem);line-height:.93;letter-spacing:-.055em;font-weight:700}
+.walk h2{font-size:clamp(1.9rem,2.6vw,2.6rem);line-height:1;letter-spacing:-.045em;margin-bottom:14px}
+.walk .lead{font-size:1.08rem;color:var(--mut);margin-top:16px}
+.walk .lead b,.walk p b{color:var(--fg);font-weight:600}
+.walk>p,.walk .txt{color:var(--mut);font-size:1rem}
+.quote{margin-top:16px;padding-left:14px;border-left:3px solid var(--acc);font-size:1.08rem;line-height:1.4;color:var(--fg);font-weight:500}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.stats div{padding:11px 12px;border-radius:14px;background:var(--tint)}
+.stats b{display:block;font-size:1.45rem;line-height:1;font-weight:700;letter-spacing:-.04em}
+.stats span{display:block;font-size:.8rem;color:var(--mut);margin-top:5px;line-height:1.35}
+.camps{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.camps button{display:flex;gap:7px;align-items:center;border:0;border-radius:99px;padding:8px 13px;background:var(--tint);cursor:pointer;font-size:.88rem;font-weight:600;transition:background .25s,color .25s}
+.camps button:hover{background:var(--fg);color:var(--surf)}
+.camps button i{width:8px;height:8px;border-radius:50%;background:var(--c,var(--acc))}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.tags span{padding:6px 11px;border-radius:99px;background:var(--tint);font-size:.85rem;font-weight:550}
+.photo{margin-top:16px;border-radius:16px;overflow:hidden;aspect-ratio:16/10;cursor:zoom-in;border:0;padding:0;width:100%;background:var(--tint)}
+.photo img{width:100%;height:100%;object-fit:cover;object-position:60% 55%}
+.ctas{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:99px;padding:12px 18px;background:var(--fg);color:var(--surf);font-weight:600;cursor:pointer;text-decoration:none}
+.btn span{opacity:.6;font-weight:500}
+.btn.ghost{background:none;color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--hair)}
+.btn.ghost:hover{box-shadow:inset 0 0 0 1.5px var(--fg)}
+.hint{margin-top:18px;color:var(--mut)}
+.nav{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--hair)}
+.nav>button{border:0;border-radius:99px;padding:9px 14px;background:var(--tint);font-weight:600;cursor:pointer;white-space:nowrap}
+.nav>button.next{background:var(--fg);color:var(--surf)}
+.nav>button:disabled{opacity:.35;cursor:default}
+.ticks{flex:1;display:flex;gap:4px;justify-content:center}
+.ticks button{flex:1;max-width:26px;height:22px;border:0;background:none;cursor:pointer;position:relative;padding:0}
+.ticks button::before{content:"";position:absolute;left:0;right:0;top:50%;height:3px;margin-top:-1.5px;border-radius:3px;background:var(--hair);transition:background .3s}
+.ticks button.on::before{background:var(--fg)}
+.ticks button.done::before{background:color-mix(in srgb,var(--fg) 45%,transparent)}
 
-/* ---------- reel ---------- */
-.reel{position:relative}
-.stage{position:relative}
-.proj{padding-block:100px}
-.p-in{display:grid;grid-template-columns:.88fr 1.12fr;gap:clamp(24px,4.5vw,72px);align-items:center;width:100%}
-.p-in>*{min-width:0}
-.kind{font-weight:600;font-size:.9rem;color:var(--mut);margin-bottom:10px}
-.proj h2{font-size:clamp(2.4rem,4.8vw,4.4rem);line-height:.95;letter-spacing:-.045em;margin-bottom:18px}
-.proj h2.rp-name{font-size:clamp(2.2rem,4vw,3.8rem);margin-bottom:10px}
-.acro{color:var(--mut);font-size:.92rem;line-height:1.45;max-width:30em;margin:0 0 16px}
-.acro b{color:var(--fg);font-weight:700}
-@media(min-width:1100px){.acro{max-width:none}.acro .l2{white-space:nowrap}}
-.exp{min-height:100vh;padding-block:130px 120px}
-.why{height:560vh;position:relative}
-.why-stage{position:sticky;top:0;height:100vh;height:100svh;display:grid;align-items:center;overflow:hidden}
-.why-frames{display:grid;width:100%}
-.fr{grid-area:1/1;opacity:0;transform:translateY(48px);filter:blur(8px);transition:opacity .55s,transform .8s var(--ease),filter .55s;pointer-events:none}
-.fr.on{opacity:1;transform:none;filter:none;pointer-events:auto}
-.fr.past{transform:translateY(-48px)}
-.fr .scrub-p{margin:0}
-.line{font-size:clamp(2.2rem,5.2vw,4.8rem);font-weight:650;line-height:1.04;letter-spacing:-.045em;max-width:16em;margin:0}
-.line .mk{background:linear-gradient(#cdd9c5,#cdd9c5) no-repeat 0 88%/0% 42%;transition:background-size 1s var(--ease) .35s;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.line .mk.on{background-size:100% 42%}
-.tag{display:flex;gap:10px;align-items:center;font-weight:600;color:var(--mut);margin:0 0 18px}
-.tag i{width:14px;height:14px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
-.why-pips{position:absolute;left:max(var(--gut),calc((100vw - var(--max))/2 + var(--gut)));bottom:34px;display:flex;gap:6px}
-.why-pips i{height:3px;width:18px;border-radius:3px;background:var(--hair);transition:width .4s var(--ease),background .3s}
-.why-pips i.on{width:38px;background:var(--fg)}
-.why.flat{height:auto}.why.flat .why-stage{position:relative;height:auto;padding-block:120px}.why.flat .why-frames{gap:56px}.why.flat .fr{grid-area:auto;opacity:1;transform:none;filter:none}.why.flat .why-pips{display:none}
-.scrub-p{max-width:1080px;margin:0 auto;font-weight:650;font-size:clamp(1.7rem,3.5vw,3rem);line-height:1.18;letter-spacing:-.03em}
-.scrub-p .w{color:color-mix(in srgb,var(--fg) 20%,var(--bg));transition:color .35s linear}
-.scrub-p .w.lit{color:var(--fg)}
-.scrub-p .mk{background:linear-gradient(#cdd9c5,#cdd9c5) no-repeat 0 88%/0% 42%;transition:background-size 1s var(--ease);-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.scrub-p .mk.on{background-size:100% 42%}
-.exp-head{margin-bottom:34px}
-.exp-title{font-size:clamp(3.6rem,9vw,8rem);line-height:.9;letter-spacing:-.055em;font-weight:700}
-.exp-sub{margin-top:14px;color:var(--mut);font-size:1.05rem}
-.exp .p-in{align-items:start}
-.numrow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
-.num{font-size:clamp(2.4rem,4.2vw,3.6rem);font-weight:700;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
-.num-pre{font-size:clamp(1.2rem,1.8vw,1.5rem);font-weight:650;letter-spacing:-.03em;margin-right:-6px}
-.numlbl{color:var(--mut);max-width:19em;line-height:1.35;font-size:.95rem}
-.p-dots{display:block;width:100%;height:84px;margin:14px 0 16px}
-.lead{font-size:1.05rem;max-width:31em}
-.facts{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:8px;max-width:33em}
-.facts li{display:grid;grid-template-columns:16px 1fr;gap:8px;color:var(--mut);font-size:.95rem}
+/* ask */
+.ask h2{font-size:clamp(1.9rem,2.6vw,2.5rem);line-height:1;letter-spacing:-.045em}
+.ask .txt{color:var(--mut);margin-top:10px;font-size:.98rem}
+.ask .txt b{color:var(--fg);font-weight:600}
+.qform{position:relative;margin-top:18px;display:flex;gap:6px;padding:5px;border-radius:18px;background:var(--surf);box-shadow:inset 0 0 0 1px var(--hair);transition:box-shadow .3s}
+.qform:focus-within{box-shadow:inset 0 0 0 1.5px var(--fg)}
+.qform input{flex:1;min-width:0;border:0;background:none;padding:11px 12px;font-size:1rem;outline:none}
+.qform input::placeholder{color:var(--mut)}
+.qform button{position:relative;border:0;background:var(--fg);color:var(--surf);border-radius:13px;padding:0 18px;font-weight:600;cursor:pointer}
+.qform.nudge{box-shadow:inset 0 0 0 1.5px var(--acc),0 0 0 5px color-mix(in srgb,var(--acc) 18%,transparent)}
+.qform.nudge button{animation:nud 1.3s var(--ease) infinite}
+@keyframes nud{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--acc) 55%,transparent)}50%{box-shadow:0 0 0 8px color-mix(in srgb,var(--acc) 0%,transparent)}}
+.nudge-tip{position:absolute;right:4px;bottom:calc(100% + 10px);padding:7px 11px;border-radius:10px;background:var(--fg);color:var(--surf);font-size:.8rem;font-weight:600;white-space:nowrap;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .4s var(--ease);pointer-events:none}
+.nudge-tip::after{content:"";position:absolute;right:26px;top:100%;border:6px solid transparent;border-top-color:var(--fg)}
+.qform.nudge .nudge-tip{opacity:1;transform:none}
+.qchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.qchips button{border:0;border-radius:99px;padding:6px 11px;background:var(--tint);font-size:.84rem;cursor:pointer;transition:background .25s,color .25s;text-align:left}
+.qchips button:hover,.qchips button.on{background:var(--fg);color:var(--surf)}
+.honest{margin-top:12px;color:var(--mut)}
+/* once a question has run, fold the intro so the answer sits on screen */
+.ask.asked h2{font-size:1.5rem}
+.ask.asked .txt,.ask.asked .honest{display:none}
+.more-q{margin-top:20px;padding-top:14px;border-top:1px solid var(--hair)}
+.more-q>p{color:var(--mut)}
+.more-q .qchips{margin-top:8px;gap:5px}
+.more-q .qchips button{font-size:.8rem;padding:5px 10px}
+.more-q .qchips button.on{display:none}
+.ans{margin-top:18px;padding-top:16px;border-top:1px solid var(--hair)}
+.ans-q{font-size:1.1rem;font-weight:650;letter-spacing:-.02em}
+.ans-m{color:var(--mut);margin-top:3px}
+.pipe{list-style:none;padding:0;margin:12px 0 0;display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.pipe li{padding:8px 9px 7px;border-radius:12px;background:var(--tint);min-width:0;transition:background .35s,color .35s}
+.pipe li span{display:flex;gap:6px;align-items:center;font-weight:600;font-size:.82rem}
+.pipe li span i{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1.5px currentColor;flex:none;display:grid;place-items:center;font-style:normal;font-size:.55rem}
+.pipe li em{display:block;font-style:normal;font-family:var(--mono);font-size:.64rem;line-height:1.3;color:var(--mut);margin-top:3px;min-height:1.3em}
+.pipe li.act span i{box-shadow:none;border:1.5px solid currentColor;border-top-color:transparent;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+.pipe li.done{background:var(--fg);color:var(--surf)}
+.pipe li.done em{color:color-mix(in srgb,var(--surf) 70%,transparent)}
+.pipe li.done span i{background:var(--surf);color:var(--fg);box-shadow:none}
+.pipe li.done span i::before{content:"✓"}
+.dec{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;margin-top:12px}
+.verdict{padding:7px 12px;border-radius:11px;font-weight:700;font-size:.88rem;color:#fff;background:var(--fg);transform:scale(0) rotate(-8deg);transition:transform .5s cubic-bezier(.3,1.6,.5,1);white-space:nowrap}
+.verdict.on{transform:scale(1) rotate(-3deg)}
+.verdict.answer{background:var(--ok)}.verdict.clarify{background:var(--warn)}.verdict.escalate{background:var(--esc)}
+.met{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.met div{font-size:.7rem;color:var(--mut)}
+.met i{display:block;height:5px;border-radius:5px;background:var(--tint);margin-top:4px;overflow:hidden}
+.met i b{display:block;height:100%;background:var(--fg);transform-origin:0 50%;transform:scaleX(0);transition:transform .9s var(--ease)}
+.atext{margin-top:12px;font-size:1.04rem;line-height:1.6}
+.atext .w{opacity:0;transition:opacity .25s}.atext .w.on{opacity:1}
+.cite{display:inline-grid;place-items:center;min-width:1.55em;height:1.55em;padding:0 .35em;margin:0 .1em;border:0;border-radius:7px;background:var(--c);color:#fff;font-family:var(--mono);font-size:.68rem;font-weight:600;vertical-align:.15em;cursor:pointer}
+.clar{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.clar:empty{display:none}
+.clar button,.clar a{border:0;border-radius:99px;padding:9px 14px;font-weight:600;cursor:pointer;text-decoration:none;background:var(--fg);color:var(--surf);font-size:.9rem}
+.clar .ghost{background:none;color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--hair)}
+
+/* right panel */
+.rp-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair)}
+.rp-head span{flex:1;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-head button{border:0;width:34px;height:34px;border-radius:50%;background:var(--tint);cursor:pointer;display:grid;place-items:center;flex:none}
+.rcpt{position:relative;background:var(--surf);border-radius:18px;padding:13px 15px 13px 19px;box-shadow:inset 0 0 0 1px var(--hair);opacity:0;transform:translateY(10px);transition:opacity .45s,transform .6s var(--ease),box-shadow .3s;overflow:hidden}
+.rcpt+.rcpt{margin-top:9px}
+.rcpt::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.rcpt.on{opacity:1;transform:none}
+.rcpt.hl{box-shadow:inset 0 0 0 2px var(--c)}
+.rcpt header{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.rcpt .n{display:grid;place-items:center;min-width:1.7em;height:1.7em;border-radius:8px;background:var(--c);color:#fff;font-family:var(--mono);font-size:.7rem;font-weight:600}
+.rcpt .src{font-weight:600;font-size:.9rem}
+.rcpt .vf{margin-left:auto;font-family:var(--mono);font-size:.68rem;color:var(--mut)}
+.rcpt .vf.ok{color:var(--ok)}
+.rcpt blockquote{margin:8px 0 6px;font-size:.97rem;line-height:1.5}
+.rcpt blockquote::before{content:"“"}.rcpt blockquote::after{content:"”"}
+.rcpt footer{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--mut)}
+.rcpt footer button{border:0;background:none;font-weight:600;font-size:.84rem;cursor:pointer;color:var(--fg);padding:4px 0;white-space:nowrap}
+.rcpt footer button:hover{text-decoration:underline;text-underline-offset:3px}
+.rcpt .ph{display:flex;gap:8px;margin-top:9px}
+.rcpt .ph button{border:0;padding:0;border-radius:11px;overflow:hidden;width:92px;aspect-ratio:4/3;cursor:zoom-in;background:var(--tint)}
+.rcpt .ph img{width:100%;height:100%;object-fit:cover}
+.empty{color:var(--mut);padding:8px 2px}
+/* option: receipts as loose cards on the map, with no panel behind them */
+.rp.float{background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;pointer-events:none;width:min(340px,26vw)}
+.rp.float .rcpt{padding:11px 13px 11px 17px}
+.rp.float .rcpt blockquote{font-size:.9rem;line-height:1.45}
+.rp.float .rcpt .vf{width:100%;margin:2px 0 0;order:3}
+.rp.float .rp-head{border:0;padding:0 0 10px;pointer-events:auto;align-self:flex-end}
+.rp.float .rp-head span{flex:none;padding:7px 12px;border-radius:99px;background:color-mix(in srgb,var(--surf) 82%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px var(--hair);color:var(--fg)}
+.rp.float .rp-head button{background:color-mix(in srgb,var(--surf) 82%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:inset 0 0 0 1px var(--hair)}
+.rp.float .scroll{padding:0 2px 8px;pointer-events:auto;align-self:stretch}
+.rp.float .scroll>*{pointer-events:auto}
+.rp.float .rcpt{background:color-mix(in srgb,var(--surf) 90%,transparent);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 22px 44px -26px rgba(0,0,0,.5),inset 0 0 0 1px var(--hair)}
+.rp.float .rcpt+.rcpt{margin-top:12px}
+
+/* project */
+.pj .kind{font-weight:600;font-size:.9rem;color:var(--mut);margin-bottom:8px}
+.pj h3{font-size:clamp(2rem,2.8vw,2.8rem);line-height:.98;letter-spacing:-.045em;margin-bottom:10px}
+.pj .sub{color:var(--mut);margin-bottom:10px}
+.pj .acro{color:var(--mut);font-size:.88rem;line-height:1.45;margin-bottom:12px}
+.pj .acro b{color:var(--fg)}
+.numrow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:6px 0 12px}
+.num{font-size:clamp(2.2rem,3vw,3rem);font-weight:700;letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums}
+.num-pre{font-size:1.25rem;font-weight:650;letter-spacing:-.03em;margin-right:-4px}
+.numlbl{color:var(--mut);max-width:20em;line-height:1.35;font-size:.92rem}
+.pj .lead{font-size:1.02rem}
+.facts{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:7px}
+.facts li{display:grid;grid-template-columns:14px 1fr;gap:8px;color:var(--mut);font-size:.93rem}
 .facts li::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--acc);margin-top:.6em}
 .facts b{color:var(--fg);font-weight:600}
-.p-act{display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;align-items:center}
-.more{display:inline-flex;gap:8px;align-items:center;font-weight:600;text-decoration:none;background:none;border:0;padding:0;cursor:pointer}
-.more span{transition:transform .3s var(--ease)}
-.more:hover span{transform:translateX(5px)}
-.more.ph{padding:8px 14px 8px 8px;border-radius:99px;background:var(--tint)}
-.more.ph img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.pj-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pj-acts a,.pj-acts button{display:inline-flex;gap:8px;align-items:center;border:0;border-radius:99px;padding:8px 14px;background:var(--tint);font-weight:600;text-decoration:none;cursor:pointer;font-size:.9rem}
+.pj-acts img{width:24px;height:24px;border-radius:50%;object-fit:cover}
+.pj-demo{margin-top:20px}
+.pj-demo>.mono{display:block;color:var(--mut);margin:0 4px 8px}
+#toyStore{position:fixed;left:-12000px;top:0;width:520px;visibility:hidden;pointer-events:none}
 
-/* pinned mode */
-.reel.pin .stage{position:sticky;top:0;height:100vh;display:grid;overflow:hidden}
-.reel.pin .proj{grid-area:1/1;padding:76px 0 70px;display:flex;align-items:center;visibility:hidden;pointer-events:none}
-.reel.pin .proj.on{visibility:visible;pointer-events:auto}
-.reel.pin .p-text>*{opacity:0;transform:translateY(26px);transition:opacity .45s,transform .7s var(--ease)}
-.reel.pin .proj.on .p-text>*{opacity:1;transform:none}
-.reel.pin .proj.on .p-text>*:nth-child(2){transition-delay:.04s}.reel.pin .proj.on .p-text>*:nth-child(3){transition-delay:.08s}.reel.pin .proj.on .p-text>*:nth-child(4){transition-delay:.12s}.reel.pin .proj.on .p-text>*:nth-child(5){transition-delay:.16s}.reel.pin .proj.on .p-text>*:nth-child(6){transition-delay:.2s}.reel.pin .proj.on .p-text>*:nth-child(7){transition-delay:.24s}
-.reel.pin .proj.was .p-text>*{transform:translateY(-26px)}
-.reel.pin .p-toy{opacity:0;transform:translateY(40px) scale(.96);transition:opacity .45s,transform .8s var(--ease)}
-.reel.pin .proj.on .p-toy{opacity:1;transform:translateY(var(--par,0px)) scale(1);transition:opacity .45s .08s,transform .8s var(--ease) .08s}
-.reel.pin .proj.was .p-toy{transform:translateY(-40px) scale(.96)}
-.reel-pips{position:absolute;left:max(var(--gut),calc((100vw - var(--max))/2 + var(--gut)));bottom:26px;display:none;gap:6px;z-index:2}
-.reel.pin .reel-pips{display:flex}
-.reel-pips i{height:3px;width:18px;border-radius:3px;background:var(--hair);transition:width .4s var(--ease),background .3s}
-.reel-pips i.on{width:38px;background:var(--fg)}
-@media(max-width:900px){.p-in{grid-template-columns:1fr}.proj{padding-block:80px}}
+/* record */
+.rec-head h3{font-size:2rem;letter-spacing:-.045em}
+.rec-head p{color:var(--mut);margin-top:6px}
+.srow{border-bottom:1px solid var(--hair);border-radius:16px;transition:background .5s var(--ease),border-color .4s,margin .5s var(--ease)}
+.srow.open{background:color-mix(in srgb,var(--c) 10%,transparent);border-bottom-color:transparent;margin:6px 0}
+.srow-h{width:100%;border:0;background:none;display:grid;grid-template-columns:auto 1fr auto 18px;gap:12px;align-items:center;padding:14px 10px;cursor:pointer;text-align:left;border-radius:16px}
+.srow-h:hover{background:color-mix(in srgb,var(--c) 6%,transparent)}
+.srow-h>i{width:11px;height:11px;border-radius:99px;background:var(--c);transition:width .55s var(--ease)}
+.srow.open .srow-h>i{width:28px}
+.srow-h .nm{display:flex;flex-direction:column;min-width:0}
+.srow-h b{font-weight:650;letter-spacing:-.01em;transition:transform .5s var(--ease)}
+.srow-h small{color:var(--mut);font-size:.8rem;line-height:1.35;max-height:0;opacity:0;overflow:hidden;transition:max-height .5s var(--ease),opacity .35s .1s}
+.srow.open .srow-h small{max-height:2.8em;opacity:1}
+.srow-h em{font-style:normal;font-family:var(--mono);font-size:.7rem;color:var(--mut)}
+.chev{position:relative;width:18px;height:18px}
+.chev::before,.chev::after{content:"";position:absolute;left:3px;right:3px;top:50%;height:1.5px;margin-top:-.75px;border-radius:2px;background:var(--mut);transition:transform .5s var(--ease)}
+.chev::after{transform:rotate(90deg)}
+.srow.open .chev::after{transform:rotate(180deg)}
+.srow.open .chev::before{transform:rotate(180deg)}
+.srow-b{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s var(--ease)}
+.srow.open .srow-b{grid-template-rows:1fr}
+.srow-b>div{overflow:hidden;min-height:0}
+.srow ol{list-style:none;margin:0;padding:0 14px 16px 50px;display:grid;gap:11px}
+.srow li{font-size:.93rem;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .5s var(--ease)}
+.srow.open li{opacity:1;transform:none;transition-delay:calc(var(--i) * 60ms + 140ms)}
+.srow li code{display:block;font-family:var(--mono);font-size:.66rem;color:var(--mut)}
 
+/* pins */
+.pin{position:absolute;left:0;top:0;transition:opacity .4s;will-change:transform}
+.pin .stem{position:absolute;left:-.5px;bottom:0;width:1px;height:30px;background:var(--fg)}
+.pin .foot{position:absolute;left:-4px;bottom:-4px;width:8px;height:8px;border-radius:50%;background:var(--fg)}
+.pin button{position:absolute;left:0;bottom:30px;transform:translateX(-50%);border:0;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:7px;padding:5px 10px 6px;border-radius:10px;background:var(--surf);color:var(--fg);box-shadow:0 10px 24px -14px rgba(0,0,0,.55),inset 0 0 0 1px var(--hair);transition:transform .35s var(--ease),background .3s,color .3s}
+.pin button:hover{transform:translateX(-50%) translateY(-3px)}
+.pin button span{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
+.pin button small{font-family:var(--mono);font-size:.62rem;color:var(--mut)}
+.pin button b{font-size:.84rem;font-weight:650}
+.pin button i.dot{width:8px;height:8px;border-radius:50%;background:var(--c,var(--acc))}
+.pin.camp .stem{height:18px;opacity:.6}
+.pin.camp button{bottom:18px;border-radius:99px;padding:4px 10px 5px 8px}
+.pin.camp button b{font-size:.78rem;font-weight:600}
+.pin.peak button{background:var(--acc);color:var(--surf)}
+.pin.peak button small{color:color-mix(in srgb,var(--surf) 75%,transparent)}
+.pin.future button{background:none;box-shadow:inset 0 0 0 1.5px var(--fg);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.pin.future .stem{background:repeating-linear-gradient(var(--fg) 0 3px,transparent 3px 6px)}
+.pin .badges{display:flex;gap:3px}
+.pin .badges:empty{display:none}
+.pin .badges em{display:grid;place-items:center;min-width:1.5em;height:1.5em;border-radius:6px;background:var(--fg);color:var(--surf);font-style:normal;font-family:var(--mono);font-size:.62rem;font-weight:600}
+.pin.cited button{box-shadow:0 0 0 2px var(--acc),0 12px 26px -12px rgba(0,0,0,.6)}
+.pin.flash .foot{animation:fl .8s var(--ease)}
+@keyframes fl{0%{box-shadow:0 0 0 0 var(--acc)}100%{box-shadow:0 0 0 14px transparent}}
+.pin.dim{opacity:.35!important}
+.qmark{position:fixed;left:0;top:0;z-index:6;pointer-events:none;opacity:0;transition:opacity .4s}
+.qmark.on{opacity:1}
+.qmark i{position:absolute;left:-14px;top:-14px;width:28px;height:28px;border-radius:50%;box-shadow:0 0 0 2px var(--fg);animation:qp 1.6s var(--ease) infinite}
+.qmark b{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--fg)}
+@keyframes qp{from{transform:scale(.6);opacity:1}to{transform:scale(1.9);opacity:0}}
+
+dialog.lb{border:0;padding:0;background:transparent;max-width:min(1100px,94vw);overflow:visible}
+dialog.lb::backdrop{background:rgba(10,10,12,.82);backdrop-filter:blur(6px)}
+.lb img{max-width:min(1100px,94vw);max-height:82vh;border-radius:14px;object-fit:contain;background:#111}
+.lb p{color:#eee;margin-top:10px;font-size:.9rem}
+
+/* phones and narrow windows: map on top, panels as sheets */
+@media(max-width:900px){
+  :root{--gap:10px}
+  .top{top:10px}
+  .brand span{display:none}
+  .brand{padding:4px}
+  .modes button{padding:7px 11px;font-size:.84rem}
+  .tr{display:none}
+  .panel{top:42dvh;top:42vh;border-radius:22px 22px 0 0;bottom:0;left:0;right:0;width:auto}
+  .rp{z-index:25}
+  .rp.off{transform:translateY(105%)}
+  .scroll{padding:18px 16px 16px}
+  .walk h1{font-size:2.6rem}
+  .pin.camp{display:none}
+  .pin button{padding:4px 8px 5px}.pin button b{font-size:.74rem}
+}
 /* ---------- toys ---------- */
 .toy{background:var(--surf);border-radius:28px;padding:clamp(18px,2.2vw,28px);box-shadow:0 30px 60px -40px rgba(0,0,0,.4);position:relative}
 .toy-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:12px;font-weight:600}
@@ -356,236 +482,72 @@ p{margin:0}
 .gsheet #jtRows>div.new{animation:rowIn .9s var(--ease)}
 @keyframes rowIn{from{background:color-mix(in srgb,var(--acc) 35%,transparent);transform:translateY(-6px)}}
 
-/* ---------- headed (roles) ---------- */
-.headed{padding-block:150px 110px}
-.hd-in{display:grid;grid-template-columns:.8fr 1.2fr;gap:clamp(24px,6vw,90px);align-items:start}
-.portrait{position:sticky;top:90px;border-radius:30px;overflow:hidden;aspect-ratio:4/5;background:var(--tint)}
-.portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;transition:clip-path .85s var(--ease),transform 1.2s var(--ease);z-index:1}
-.portrait img.pitch{object-position:68% 55%}
-.portrait img.on{z-index:2;clip-path:inset(0);transform:none}
-.portrait img[data-i="1"]:not(.on){clip-path:inset(0 0 0 100%);transform:scale(1.08);transition-delay:.85s}
-.portrait img[data-i="0"]:not(.on){clip-path:inset(0 100% 0 0);transform:scale(1.08);transition-delay:.85s}
-.portrait figcaption{z-index:3}
-.cap-slot{display:block;overflow:hidden;line-height:1.45}
-.cap-slot span{display:block;transition:transform .45s var(--ease),opacity .35s}
-.cap-slot span.out{transform:translateY(-100%);opacity:0}
-.cap-slot span.pre{transform:translateY(100%);opacity:0;transition:none}
-.portrait figcaption{position:absolute;left:14px;bottom:14px;right:14px;padding:10px 14px;border-radius:16px;background:color-mix(in srgb,var(--surf) 70%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);font-size:.85rem;font-weight:550}
-.headed h2{font-size:clamp(2.6rem,5.4vw,4.8rem);line-height:.95;letter-spacing:-.045em;margin-bottom:22px}
-.headed .intro{font-size:1.15rem;max-width:32em}
-.ask{margin-top:34px;font-weight:600;color:var(--mut);font-size:.9rem;margin-bottom:10px}
-.hd-seg{max-width:560px}
-.hd-seg button{padding:12px 14px;font-size:.95rem}
-.hd-panels{display:grid;margin-top:22px}
-.hd-panel{grid-area:1/1;opacity:0;transform:translateY(14px);transition:opacity .35s,transform .6s var(--ease);pointer-events:none}
-.hd-panel.on{opacity:1;transform:none;pointer-events:auto}
-.hd-panel h3{font-size:1.7rem;line-height:1.1;margin-bottom:10px}
-.hd-panel>p{font-size:1.05rem;max-width:34em;color:var(--mut)}
-.hd-panel>p b{color:var(--fg);font-weight:600}
-.traits{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 6px;max-width:40em}
-.traits span{padding:8px 13px;border-radius:99px;background:var(--tint);font-weight:550;font-size:.9rem}
-.proof{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:0;max-width:40em}
-.proof li{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:12px 0;border-top:1px solid var(--hair);font-size:.95rem}
-.proof li span{color:var(--mut)}
-.anywhere{margin-top:34px;display:flex;gap:14px;align-items:center;padding:16px 20px;border-radius:20px;background:var(--fg);color:var(--bg);max-width:40em}
-.anywhere svg{flex:none;width:28px;height:28px}
-.anywhere b{font-weight:650}
-@media(max-width:900px){.hd-in{grid-template-columns:1fr}.portrait{position:relative;top:0;max-width:360px}.proof li{grid-template-columns:1fr;gap:2px}}
 
-/* ---------- path ---------- */
-.path{padding-block:90px 110px}
-.sec-head{display:flex;justify-content:space-between;align-items:end;gap:30px;flex-wrap:wrap;margin-bottom:26px}
-.sec-head h2{font-size:clamp(2.2rem,4.6vw,3.8rem);line-height:1;letter-spacing:-.045em}
-.sec-head p{color:var(--mut);max-width:28em}
-.gantt{position:relative;padding-top:32px;overflow:clip}
-.g-axis{position:absolute;inset:0;pointer-events:none}
-.g-axis span{position:absolute;top:0;bottom:0;border-left:1px dashed var(--hair);font-size:.76rem;color:var(--mut);padding-left:6px}
-.lane-g{position:relative;height:54px;display:block;width:100%;border:0;background:none;padding:0;cursor:pointer;text-align:left}
-.lane-g .bar-g{position:absolute;top:28px;height:10px;border-radius:10px;background:var(--hair);transition:background .35s,height .35s var(--ease),top .35s var(--ease)}
-.lane-g .lab{position:absolute;top:5px;font-weight:600;font-size:.88rem;white-space:nowrap;color:var(--mut);transition:color .3s}
-.lane-g .lab.r{transform:translateX(-100%)}
-.lane-g .lab i{font-style:normal;display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--acc2,#e2592b);margin-left:6px;vertical-align:1px}
-.lane-g.ev .bar-g{width:14px!important;height:14px;top:26px;border-radius:3px;transform:translateX(-50%) rotate(45deg)}
-.lane-g:hover .lab,.lane-g.on .lab{color:var(--fg)}
-.lane-g.on .bar-g{background:var(--fg);height:14px;top:26px}
-.g-detail{margin-top:26px;background:var(--surf);border-radius:26px;padding:clamp(20px,3.4vw,36px);display:grid;grid-template-columns:240px 1fr auto;gap:28px;min-height:190px;box-shadow:0 30px 60px -45px rgba(0,0,0,.35)}
-.g-detail h3{font-size:1.45rem;line-height:1.1}
-.g-detail .when{color:var(--mut);margin-top:8px;font-size:.95rem}
-.g-detail ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;align-content:start}
-.g-detail li{padding-left:18px;position:relative}
-.g-detail li::before{content:"";position:absolute;left:0;top:.62em;width:7px;height:7px;border-radius:50%;background:var(--fg)}
-.g-detail>*{transition:opacity .3s,transform .45s var(--ease)}
-.g-detail.swap>*{opacity:0;transform:translateY(8px)}
-.thumbs{display:grid;grid-template-columns:repeat(2,96px);gap:8px;align-content:start}
-.thumbs button{border:0;padding:0;border-radius:14px;overflow:hidden;cursor:zoom-in;aspect-ratio:1;background:var(--tint);transition:transform .35s var(--ease)}
-.thumbs button:hover{transform:scale(1.04)}
-.thumbs img{width:100%;height:100%;object-fit:cover}
-.thumbs:empty{display:none}
-@media(max-width:900px){.g-detail{grid-template-columns:1fr}.thumbs{grid-template-columns:repeat(3,1fr)}.lane-g .lab{font-size:.78rem}}
-
-/* ---------- specs ---------- */
-.specs{padding-block:90px 110px}
-.sp-row{display:grid;grid-template-columns:230px 1fr;gap:30px;padding:24px 0;border-top:1px solid var(--hair)}
-.sp-row h3{font-size:1.15rem;font-weight:650}
-.sp-cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px 30px}
-.sp-cells b{display:block;font-weight:600;margin-bottom:2px}
-.sp-cells span{color:var(--mut);font-size:.95rem}
-.sp-tags{display:flex;flex-wrap:wrap;gap:7px;align-items:flex-start;align-content:flex-start}
-.sp-tags span{padding:6px 12px;border-radius:99px;background:var(--tint);font-size:.9rem}
-@media(max-width:760px){.sp-row{grid-template-columns:1fr;gap:12px}}
-
-/* ---------- contact ---------- */
-.contact{padding-block:110px 120px}
-.contact h2{font-size:clamp(2.8rem,8vw,7rem);line-height:.92;letter-spacing:-.055em;font-weight:700}
-.c-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px;align-items:center}
-.c-mail{border:0;background:var(--fg);color:var(--bg);border-radius:99px;padding:15px 24px;font-weight:600;font-size:1.05rem;cursor:pointer;display:inline-flex;gap:14px;align-items:center}
-.c-mail span{opacity:.6;font-weight:500;transition:opacity .3s}
-.c-mail:hover span{opacity:1}
-.c-link{padding:14px 20px;border-radius:99px;text-decoration:none;font-weight:600;box-shadow:inset 0 0 0 1.5px var(--hair);transition:box-shadow .3s}
-.c-link:hover{box-shadow:inset 0 0 0 1.5px var(--fg)}
-.fine{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:100px;padding-top:20px;border-top:1px solid var(--hair);font-size:.8rem;color:var(--mut)}
-
-/* ---------- resume dialog ---------- */
-.res-btn{border:0;background:linear-gradient(currentColor,currentColor) no-repeat 0 100%/0 1px;padding:0 0 2px;cursor:pointer;font-size:.9rem;transition:background-size .3s var(--ease)}
-.res-btn:hover{background-size:100% 1px}
-@media(max-width:820px){.links{gap:14px}.brand .chap{display:none}}
-@media(max-width:400px){.brand{font-size:.92rem}.brand img{width:24px;height:24px}.links a.cta{padding:7px 12px}}
-dialog.rdlg{border:0;padding:0;border-radius:28px;width:min(620px,calc(100% - 24px));background:var(--surf);color:var(--fg);box-shadow:0 40px 100px -30px rgba(0,0,0,.45)}
-dialog.rdlg::backdrop{background:rgba(10,10,12,.45);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
-dialog.rdlg[open]{animation:rdIn .5s var(--ease)}
-@keyframes rdIn{from{opacity:0;transform:translateY(30px) scale(.97)}}
-.rd-in{display:grid;grid-template-columns:150px 1fr;gap:26px;padding:28px;position:relative;align-items:center}
-.rd-x{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;border:0;background:var(--tint);cursor:pointer;display:grid;place-items:center;transition:transform .35s var(--ease)}
-.rd-x:hover{transform:rotate(90deg)}
-.rd-doc{aspect-ratio:210/297;background:#fff;border-radius:10px;box-shadow:0 14px 34px -14px rgba(0,0,0,.35),inset 0 0 0 1px rgba(0,0,0,.06);padding:14px 12px;display:flex;flex-direction:column;gap:5px;transform:rotate(-3deg);transition:transform .5s var(--ease)}
-dialog.rdlg:hover .rd-doc{transform:rotate(0) translateY(-3px)}
-.rd-doc b{display:block;height:7px;width:60%;margin:0 auto 4px;border-radius:3px;background:#1a1a1a}
-.rd-doc i{display:block;height:3px;border-radius:2px;background:#d6d6d2}
-.rd-doc i.h{height:4px;width:45%;background:#1a1a1a;margin-top:5px}
-.rd-doc i:nth-child(3n){width:84%}.rd-doc i:nth-child(4n){width:70%}
-.rdlg h3{font-size:1.9rem;letter-spacing:-.035em;margin-bottom:6px}
-.rdlg p{color:var(--mut);margin-bottom:18px;max-width:26em}
-.rd-act{display:flex;gap:10px;flex-wrap:wrap}
-.rd-act a{text-decoration:none}
-.rd-act .run{margin-top:0}
-.rd-ghost{display:inline-flex;gap:10px;align-items:center;padding:11px 19px;border-radius:99px;font-weight:600;box-shadow:inset 0 0 0 1.5px var(--hair);transition:box-shadow .3s}
-.rd-ghost:hover{box-shadow:inset 0 0 0 1.5px var(--fg)}
-.rd-ghost i{font-style:normal;transition:transform .3s var(--ease)}
-.rd-ghost:hover i{transform:translateY(2px)}
-.rdlg small{display:block;margin-top:14px;color:var(--mut);font-size:.8rem}
-@media(max-width:520px){.rd-in{grid-template-columns:1fr;gap:18px;padding:24px}.rd-doc{width:110px}}
-
-/* ---------- lightbox ---------- */
-dialog.lb{border:0;padding:0;background:transparent;max-width:min(1100px,94vw);max-height:92vh;overflow:visible}
-dialog.lb::backdrop{background:rgba(10,10,12,.82);backdrop-filter:blur(6px)}
-dialog.lb[open]{animation:lbIn .45s var(--ease)}
-@keyframes lbIn{from{opacity:0;transform:scale(.96)}}
-.lb img{max-width:min(1100px,94vw);max-height:80vh;border-radius:18px;object-fit:contain;background:#111}
-.lb-bar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:12px;color:#eee;font-size:.92rem}
-.lb-bar div{display:flex;gap:8px}
-.lb-bar button{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:99px;padding:8px 14px;cursor:pointer;font-weight:600}
-.lb-bar button:hover{background:rgba(255,255,255,.22)}
-
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation:none!important;transition-delay:0s!important}}
+.toy{box-shadow:0 26px 50px -36px rgba(0,0,0,.45),inset 0 0 0 1px var(--hair)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation:none!important}}
 </style>
 </head>
 <body>
+<canvas id="map" aria-hidden="true"></canvas>
+<div id="pins"></div>
+<div class="qmark" id="qmark"><i></i><b></b></div>
 
-<header class="nav" id="nav">
-  <div class="nav-in">
-    <a class="brand" href="#top"><img src="assets/headshot.jpg" alt="">Sriraj Paruchuru <span class="chap"><span id="chap">&nbsp;</span></span></a>
-    <nav class="links" aria-label="Sections"><a href="#experience">Experience</a><a href="#work">Work</a><a href="#headed">Where I'm headed</a><a href="#path">Path</a><a href="#specs">Specs</a><button class="res-btn" id="resBtn" aria-haspopup="dialog">My resume</button><a class="cta" href="#contact">Get in touch</a></nav>
-  </div>
-  <div class="prog"><i id="prog"></i></div>
+<header class="top">
+  <a class="brand" href="#" id="home"><img src="assets/headshot.jpg" alt=""><span>Sriraj Paruchuru</span></a>
+  <nav class="modes" aria-label="Modes"><button data-mode="walk" class="on"><span class="lg">Walk the route</span><span class="sm">Walk</span></button><button data-mode="ask"><span class="lg">Ask the map</span><span class="sm">Ask</span></button><button data-panel="record"><span class="lg">The record</span><span class="sm">Record</span></button></nav>
+  <div class="tr"><a class="pill ghost" href="assets/Sriraj_Paruchuru_Resume.pdf" target="_blank" rel="noopener">Resume</a><button class="pill" data-go="8">Get in touch</button></div>
 </header>
 
-<nav class="dock hide" id="dock" aria-label="Projects"><div class="d-name" aria-hidden="true"><span id="dName">CrackD</span></div><div class="d-dots" id="dDots"></div></nav>
-
-<main>
-<section class="hero wrap" id="top" data-chap="" data-bg="#f7f7f4" data-fg="#141414" data-surf="#ffffff" data-acc="#141414">
-  <div class="hero-in">
-    <div>
-      <h1>Pick a colour.</h1>
-      <p class="lede">Each one is something I built, and each one does something when you press it. I'm <b><img src="assets/headshot.jpg" alt="">Sriraj Paruchuru</b>. I spent nearly 18 months shipping software at Norstella, I'm now pursuing an MSc in AI and Machine Learning at Birmingham, and my long-term goal is to become an AI product manager.</p>
+<aside class="panel lp" id="lp" aria-label="Story and questions">
+  <section class="walk" id="walk" aria-live="polite" style="display:contents">
+    <div class="scroll" id="chBody"></div>
+    <div class="nav"><button id="prev" aria-label="Previous stop">←</button><div class="ticks" id="ticks"></div><button class="next" id="next">Next →</button></div>
+  </section>
+  <section class="ask scroll" id="ask" hidden>
+    <p class="kick mono"><span>Ask the map</span><span>No model runs here</span></p>
+    <h2>Don't take my word for it.</h2>
+    <p class="txt">Ask about me. The map finds the places that hold the evidence, checks every quote against the record, then decides whether to <b>answer</b>, <b>ask you something back</b>, or <b>hand you to a person</b>.</p>
+    <form class="qform" id="qform" autocomplete="off">
+      <label for="qin" class="mono" style="position:absolute;left:-9999px">Your question</label>
+      <input id="qin" placeholder="Ask about me. Can he ship?" maxlength="140">
+      <button type="submit" id="qbtn">Ask ↵<span class="nudge-tip">Press Ask to run it</span></button>
+    </form>
+    <div class="qchips" id="qchips"></div>
+    <p class="honest mono">Answers are written in advance. The checks run against the record: every quote has to match it word for word.</p>
+    <div class="ans" id="ans" hidden>
+      <p class="ans-q" id="aq"></p><p class="ans-m mono" id="am"></p>
+      <ol class="pipe" id="pipe"><li><span><i></i>Retrieve</span><em></em></li><li><span><i></i>Check</span><em></em></li><li><span><i></i>Decide</span><em></em></li><li><span><i></i>Answer</span><em></em></li></ol>
+      <div class="dec"><span class="verdict" id="verdict">Answer</span><div class="met" id="met"><div>Coverage<i><b></b></i></div><div>Agreement<i><b></b></i></div><div>Stability<i><b></b></i></div></div></div>
+      <p class="atext" id="atext"></p>
+      <div class="clar" id="clar"></div>
     </div>
-    <div class="sticks" id="sticks"></div>
-  </div>
-  <div class="hero-foot"><span>Scroll, or press a colour.</span><span class="greet" aria-live="polite"><span id="greetTxt"></span><span class="times" id="greetTimes"></span></span></div>
-</section>
+    <div class="more-q" id="moreQ" hidden><p class="mono">Ask something else</p></div>
+  </section>
+</aside>
 
-<section class="exp" id="experience" data-chap="Experience" data-name="Norstella" data-bg="#d9e2ea" data-fg="#0e1a26" data-surf="#f1f5f8" data-acc="#1e64a8" data-line="Nearly 18 months of production software.">
-  <div class="wrap exp-head">
-    <p class="kind">Experience</p>
-    <h2 class="exp-title">Norstella</h2>
-    <p class="exp-sub">Software Developer · Strategic Intelligence and Enterprise Value platform teams · April 2024 to September 2025</p>
-  </div>
-  <div class="wrap p-in">
-    <div class="p-text">
-      <div class="numrow"><span class="num" id="nsNum">20-30 ms</span><span class="numlbl">filtered responses, down from roughly 300-500 ms, on queries scanning millions of rows across several databases.</span></div>
-      <canvas class="p-dots" id="nsDots" aria-hidden="true"></canvas>
-      <p class="lead">Nearly 18 months on two pharmaceutical analytics platforms in React, TypeScript and Node.js, taking work from requirements through testing on 3-4 day release cycles.</p>
-      <ul class="facts"><li><span><b>Faster data:</b> better backend routing and server-side filtering cut filtered responses to 20-30 ms.</span></li><li><span><b>Excel export, AWS Lambda and S3</b> delivery with validation and error handling.</span></li><li><span><b>Auth0 SSO, JWT and role-based access</b> for pharmaceutical clients.</span></li><li><span><b>Releases every 3-4 days</b> with Playwright checks, Docker and Azure DevOps.</span></li><li><span>Helped design and build <b>internal AI tools</b> with senior colleagues.</span></li></ul>
-    </div>
-    <div class="p-toy"><div class="toy" id="ns">
+<aside class="panel rp off" id="rp" aria-label="Details">
+  <div class="rp-head"><button id="rpBack" aria-label="Back" hidden>←</button><span class="mono" id="rpTitle"></span><button id="rpX" aria-label="Close">×</button></div>
+  <div class="scroll" id="rpBody"></div>
+</aside>
+
+<div id="toyStore" aria-hidden="true">
+<div class="toy" id="ns">
           <div class="toy-head"><span>Same query, twice</span><span class="note">Real timings, invented data</span></div>
           <div class="chips" id="nsChips"><button class="on">Oncology</button><button class="on">Phase III</button><button>Europe</button><button>Updated this month</button></div>
           <div class="lanes"><div class="lane"><label><span>Before · filtered after the fetch</span><b id="nsB">0 ms</b></label><i><b id="nsBB"></b></i></div><div class="lane fast"><label><span>After · filtered on the server</span><b id="nsA">0 ms</b></label><i><b id="nsAB"></b></i></div></div>
           <label class="slow"><input type="checkbox" id="nsSlow"> Slow motion, 10x</label>
           <div class="rows" id="nsRows"></div>
           <button class="run" id="nsRun">Apply filters <i>→</i></button>
-        </div></div>
-  </div>
-</section>
-
-<section class="why" id="why" data-chap="Why AI" data-bg="#f7f7f4" data-fg="#141414" data-surf="#ffffff" data-acc="#141414">
-  <div class="why-stage">
-    <div class="why-frames wrap">
-      <div class="fr" data-f="0"><p class="scrub-p" id="scrubP">Norstella taught me to think in processes: where the data comes from, where it can break, and who is relying on it when it does. It's also what [pulled me into AI.] Most of what I build now has a language model or an AI agent or an agentic workflow somewhere inside it, so most of what I build also has a way of checking it.</p></div>
-      <div class="fr" data-f="1"><p class="tag"><i style="--c:#cdd9c5"></i>CrackD</p><p class="line">CrackD scores CVs through a strict schema.</p></div>
-      <div class="fr" data-f="2"><p class="tag"><i style="--c:#16213d"></i>MSc dissertation</p><p class="line">My dissertation validates every citation against its source passage.</p></div>
-      <div class="fr" data-f="3"><p class="tag"><i style="--c:#0f5132"></i>FPL Duel</p><p class="line">My football model lets an LLM write the headlines but never touch a number.</p></div>
-      <div class="fr" data-f="4"><p class="line">I like to build and develop software that can <span class="mk" id="whyMk">show you why.</span></p></div>
-    </div>
-    <div class="why-pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-  </div>
-</section>
-
-<section class="reel" id="work" data-chap="Work">
-  <div class="stage" id="stage">
-
-    <article class="proj" id="p-crackd" data-name="CrackD" data-bg="#cdd9c5" data-fg="#1c2b20" data-surf="#f4f7f1" data-acc="#4f7a5a" data-line="Interview prep. Won Boffin's Den, March 2026." data-dots="crackd">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Product · 2026</p>
-          <h2>CrackD</h2>
-          <div class="numrow"><span class="num-pre">Over</span><span class="num" data-n="60" data-suf="%">60%</span><span class="numlbl">of 25+ student and professional testers said they use it now and want to keep going.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">Reads a CV against a job description the way a recruiter and an ATS would, then runs a mock interview that goes straight for the gaps.</p>
-          <ul class="facts"><li><span><b>Champion and Most Valuable Product</b>, Boffin's Den, Google Cloud Agentic AI Hackathon, March 2026.</span></li><li><span><b>8 scores and 4 feedback cards</b> from strict JSON-schema output, replacing fragile regex.</span></li><li><span>A <b>61-issue backlog</b> from tester feedback, sequenced into a multi-sprint roadmap to take CrackD to MVP.</span></li></ul>
-          <div class="p-act"><button class="more ph" data-gal="boffins" data-i="0"><img src="assets/boffins-stage.jpg" alt="">See the pitch <span>→</span></button><a class="more" href="https://github.com/Sriraj-p/CrackD" target="_blank" rel="noopener">GitHub <span>→</span></a></div>
         </div>
-        <div class="p-toy"><div class="toy" id="ck">
+<div class="toy" id="ck">
           <div class="toy-head"><span>Job: Junior ML Engineer</span><span class="note">Made-up CVs, canned output</span></div>
           <div class="seg" id="cvSeg"><button class="on" data-i="0">Data analyst</button><button data-i="1">Bootcamp grad</button><button data-i="2">Career switcher</button></div>
           <div class="ck-top"><div class="ck-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="43" fill="none" stroke="var(--tint)" stroke-width="8"/><circle id="ckArc" cx="50" cy="50" r="43" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-dasharray="270.2" stroke-dashoffset="270.2" style="transition:stroke-dashoffset 1s var(--ease)"/></svg><b id="ckNum">0</b></div><div class="ck-bars" id="ckBars"></div></div>
           <div class="ck-cards" id="ckCards"></div>
           <div class="ck-q"><small>First interview question</small><span id="ckQ">Press analyse.</span><span class="caret" aria-hidden="true"></span></div>
           <button class="run" id="ckRun">Analyse this CV <i>→</i></button>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-onesize" data-name="One Size" data-bg="#16213d" data-fg="#eef1f8" data-surf="#1f2c4f" data-acc="#8fb4ff" data-line="MSc dissertation. Six models, five rulebooks." data-dots="onesize">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Research · MSc dissertation</p>
-          <h2>One Size Might Not Fit All</h2>
-          <div class="numrow"><span class="num" data-n="3120">3,120</span><span class="numlbl">benchmark requests across 6 low-cost models, 350 cases and 5 rulebooks.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">Is a cheap model that's reliable on grant rules just as reliable on housing complaints? I held one retrieval system fixed and swapped only the model.</p>
-          <ul class="facts"><li><span><b>34 public documents and 510 contracts</b>, searched in three passes: rules, exceptions, then authority.</span></li><li><span>Every citation <b>checked against the exact passage</b> it names.</span></li><li><span>Answers, asks, or <b>escalates to a person</b>, based on three confidence signals.</span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="os">
+<div class="toy" id="os">
           <div class="toy-head"><span>Ask the pipeline</span><span class="note">Illustrative, not a study result</span></div>
           <div class="seg" id="domSeg"></div>
           <p class="os-q" id="osQ"></p>
@@ -593,41 +555,14 @@ dialog.lb[open]{animation:lbIn .45s var(--ease)}
           <div class="os-met" id="osMet"><div>Rule coverage<i><b></b></i></div><div>Evidence agreement<i><b></b></i></div><div>Decision stability<i><b></b></i></div></div>
           <div class="os-out" id="osOut"><span class="stamp" id="osStamp">Answer</span><p id="osWhy"></p></div>
           <button class="run" id="osRun">Retrieve and decide <i>→</i></button>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-fpl" data-name="FPL Duel" data-bg="#0f5132" data-fg="#eaf6ee" data-surf="#156a42" data-acc="#d7ff5f" data-line="My model's fantasy team against mine." data-dots="fpl">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Side project · live in 2026/27</p>
-          <h2>FPL Duel</h2>
-          <div class="numrow"><span class="num" data-n="7">7</span><span class="numlbl">seasons of history behind every pick, with no peeking at the future.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">xGesus himself, a model-run fantasy team, plays Bayer Neverlosin, managed by me. The optimiser picks the players. An LLM writes the headlines and can't change a number.</p>
-          <ul class="facts"><li><span><b>An exact optimiser</b> for a legal £100m squad, XI, captain and bench.</span></li><li><span>The clean <b>head-to-head starts in Gameweek 3</b>.</span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="fp">
+<div class="toy" id="fp">
           <div class="vs"><b>xGesus himself</b><span>vs</span><b>Bayer Neverlosin</b></div>
           <div class="toy-head"><span>You pick the captain</span><span class="note">Illustrative numbers</span></div>
           <div class="cands" id="cands"></div>
           <div class="fpl-out"><div><small><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="5.5" width="8" height="5.5" rx="1"/><path d="M4 5.5V4a2 2 0 014 0v1.5"/></svg>Optimiser · numbers</small><p id="fpNum"></p></div><div><small>Editorial LLM · words only</small><p id="fpHead"></p></div></div>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-reporter" data-name="The R.E.P.O.R.T.E.R." data-bg="#c9e4ea" data-fg="#0f2a30" data-surf="#f2f9fa" data-acc="#0e7c86" data-line="Checked claims from the news, on a laptop." data-dots="reporter">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Tool · runs on a laptop</p>
-          <h2 class="rp-name">The R.E.P.O.R.T.E.R.</h2>
-          <p class="acro">An LLM-Powered Web Intelligence Pipeline focusing on<br><span class="l2"><b>R</b>etrieval · <b>E</b>xtraction · <b>P</b>rovenance · <b>O</b>rganization · <b>R</b>eliability · <b>T</b>emporal <b>E</b>vidence · <b>R</b>easoning</span></p>
-          <div class="numrow"><span class="num" data-n="0" data-pre="£">£0</span><span class="numlbl">in API costs. A local model does all the reading.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">Collects reporting from registered sources, pulls out claims, and throws away any claim it can't quote word for word.</p>
-          <ul class="facts"><li><span><b>Qwen 2.5 7B through Ollama</b>, stored in DuckDB with full provenance.</span></li><li><span><b>NLP under the hood:</b> main-text extraction, near-duplicate detection with SimHash, and schema-constrained claim extraction where every claim must quote its source.</span></li><li><span>Feeds <b>FPL Duel</b> team news and <b>CrackD</b> company context.</span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="rp">
+<div class="toy" id="rp">
           <div class="toy-head"><span>Three articles in</span><span class="note">Illustration</span></div>
           <div class="arts" id="rpArts">
             <div class="art"><span><b>Manager: midfielder misses Saturday</b></span><small>Club press conference, 14:02</small><span class="tag">source</span></div>
@@ -640,40 +575,14 @@ dialog.lb[open]{animation:lbIn .45s var(--ease)}
             <div class="claim"><b>Player A has a hamstring injury</b><q>no matching sentence in any source</q><span class="v">waiting</span></div>
           </div>
           <button class="run" id="rpRun">Run the pipeline <i>→</i></button>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-retail" data-name="Retail" data-bg="#f2e3a4" data-fg="#2b2408" data-surf="#fbf4d6" data-acc="#b8430f" data-line="Why did customers stop coming?" data-dots="retail">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Analysis</p>
-          <h2>Why did they stop coming?</h2>
-          <div class="numrow"><span class="num" data-n="3000">3,000</span><span class="numlbl">synthetic customers, 78,000 transactions, 26 weeks, 9 behaviour types.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">Retail Behavioural Anomaly Detection asks why customers leave, and whether it was the shop's fault.</p>
-          <ul class="facts"><li><span><b>Z-score flag, sustained-drop check, then a decision tree</b> over price, stock, weather and calendar.</span></li><li><span>Each cause labelled <b>internal, external or unknown</b>, with a response to match.</span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="rt">
+<div class="toy" id="rt">
           <div class="toy-head"><span>Pick a customer</span><span class="note">Synthetic, like the real study</span></div>
           <div class="seg" id="arcSeg"></div>
           <div class="chart"><svg viewBox="0 0 600 220" id="rtSvg" aria-label="Weekly chart for the selected customer"></svg><div class="legend"><span><i></i><span id="lgA">Visits per week</span></span><span><i class="d"></i><span id="lgB">Price index</span></span></div></div>
           <div class="steps" id="rtSteps"></div>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-med" data-name="MedHealth" data-bg="#e4def4" data-fg="#221a38" data-surf="#f8f6fd" data-acc="#6b54c9" data-line="Medical imaging models, small enough for a phone." data-dots="med">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Deep learning</p>
-          <h2>MedHealth</h2>
-          <div class="numrow"><span class="num" data-n="33" data-suf=" MB">33 MB</span><span class="numlbl">down from 98 MB, so brain tumour segmentation runs on an Android phone.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">Two deep learning pipelines, one for brain tumour segmentation and one for pneumonia detection, then the less glamorous work of making them run on a phone.</p>
-          <ul class="facts"><li><span><b>M-Net with Dice loss:</b> 94.1% accuracy on 3,064 MRI slices.</span></li><li><span><b>Four architectures compared</b> for pneumonia; the best reached 98.6% on ~5,800 chest X-rays.</span></li><li><span><b>98 MB to 33 MB</b> with TensorFlow Lite, a 66% cut, for on-device inference.</span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="mh">
+<div class="toy" id="mh">
           <div class="toy-head"><span>Run the models</span><span class="note">Illustration, not real scans</span></div>
           <div class="seg" id="mhSeg"><button class="on" data-i="0">Brain MRI</button><button data-i="1">Chest X-ray</button><button data-i="2">Shrink for Android</button></div>
           <div class="mh-stage">
@@ -692,21 +601,8 @@ dialog.lb[open]{animation:lbIn .45s var(--ease)}
             </div>
           </div>
           <button class="run" id="mhRun">Run M-Net <i>→</i></button>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-tracker" data-name="Job Tracker" data-bg="#eadfcf" data-fg="#2e2417" data-surf="#fbf7f1" data-acc="#a0612b" data-line="Press Apply anywhere, log it to your own sheet." data-dots="tracker">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">Browser extension</p>
-          <h2>Job Application Tracker</h2>
-          <div class="numrow"><span class="num" data-n="150" data-pre="~">~150</span><span class="numlbl">job boards, ATS platforms and staffing firms it recognises out of the box.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">A Chrome and Edge extension I built for my own job search. Press Apply on any job site and the role lands in a Google Sheet you own.</p>
-          <ul class="facts"><li><span>Reads <b>schema.org JobPosting</b> data first, then falls back to text signals in several languages.</span></li><li><span><b>Nothing is logged until you confirm</b>, so abandoned Easy Apply flows stay out of the sheet.</span></li><li><span><b>Manifest V3</b> extension with a Google Apps Script backend.</span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="jt">
+<div class="toy" id="jt">
           <div class="toy-head"><span>Any job site</span><span class="note">Illustration, made-up companies</span></div>
           <div class="posting" id="jtPost">
             <small id="jtSite">careers.fernhill.ai</small>
@@ -723,21 +619,8 @@ dialog.lb[open]{animation:lbIn .45s var(--ease)}
             </div>
           </div>
           <div class="gsheet"><div class="gh"><span>Date</span><span>Company</span><span>Role</span><span>Status</span></div><div id="jtRows"><div><span>19 Sep</span><span>Kestrel Health</span><span>ML Engineer</span><span>Applied</span></div><div><span>21 Sep</span><span>Brightwater Retail</span><span>Data Scientist</span><span>Interviewing</span></div></div></div>
-        </div></div>
-      </div>
-    </article>
-
-    <article class="proj" id="p-diffproof" data-name="DiffProof" data-bg="#111111" data-fg="#f2f2f2" data-surf="#1c1c1c" data-acc="#ff5c5c" data-line="Would your tests notice? In design." data-dots="diffproof">
-      <div class="wrap p-in">
-        <div class="p-text">
-          <p class="kind">In design</p>
-          <h2>DiffProof</h2>
-          <div class="numrow"><span class="num" data-n="4">4</span><span class="numlbl">mutants on one changed line. The original tests catch one of them.</span></div>
-          <canvas class="p-dots" aria-hidden="true"></canvas>
-          <p class="lead">AI writes code changes in seconds, and reviewers skim them. DiffProof breaks the changed lines on purpose and checks whether any test notices.</p>
-          <ul class="facts"><li><span><b>Mutation testing on changed lines only</b>, fast enough for every pull request.</span></li><li><span><b>LLM-written tests only count after they run.</b></span></li></ul>
         </div>
-        <div class="p-toy"><div class="toy" id="dp">
+<div class="toy" id="dp">
           <div class="toy-head"><span>eligibility.py</span><span class="note">Concept demo</span></div>
           <div class="code"><div class="c">  def eligible(score, years):</div><div class="del">-     return score > 0.80</div><div class="add">+     return score > 0.85 and years >= 2</div></div>
           <p class="lbl">Tests</p>
@@ -745,250 +628,403 @@ dialog.lb[open]{animation:lbIn .45s var(--ease)}
           <p class="lbl">Mutants on the changed line</p>
           <div class="muts" id="dpMuts"></div>
           <div class="dp-foot"><div class="dp-score"><small>Changed-line mutation score</small><span id="dpScore">?</span></div><button class="run" id="dpRun">Run mutants <i>→</i></button></div>
-        </div></div>
-      </div>
-    </article>
-
-
-    <div class="reel-pips" id="pips" aria-hidden="true"></div>
-  </div>
-</section>
-
-
-<section class="headed wrap" id="headed" data-chap="Where I'm headed" data-bg="#f7f7f4" data-fg="#141414" data-surf="#ffffff" data-acc="#141414">
-  <div class="hd-in">
-    <figure class="portrait" style="margin:0"><img class="ph pitch" data-i="1" src="assets/boffins-stage.jpg" alt="Sriraj Paruchuru at the lectern, demoing CrackD at Boffin's Den"><img class="ph on" data-i="0" src="assets/headshot.jpg" alt="Sriraj Paruchuru, smiling, in a navy blazer"><figcaption><span class="cap-slot"><span id="phCap">Sriraj Paruchuru · Birmingham, UK</span></span></figcaption></figure>
-    <div>
-      <h2>Where I'm headed.</h2>
-      <p class="intro">The long-term goal is AI product management: working out what's worth building, with the people who build it. How I get there depends on what your team needs.</p>
-      <p class="ask">What are you hiring for?</p>
-      <div class="seg hd-seg" id="hdSeg"><button class="on" data-i="0">Someone to build</button><button data-i="1">Someone to grow into product</button></div>
-      <div class="hd-panels">
-        <div class="hd-panel on" data-i="0">
-          <h3>Then let me build with you first.</h3>
-          <p>If you think more time in development will make me a better product manager later, I agree. I'm open to <b>applied AI, software and forward deployed engineering</b> roles.</p>
-          <div class="traits"><span>I keep up with the latest in AI</span><span>I test what the model returns</span><span>I prototype fast</span></div>
-          <ul class="proof">
-            <li><span>Shipped</span>Nearly 18 months on two production platforms at Norstella, on a release every 3-4 days</li>
-            <li><span>Performance</span>Cut filtered responses from roughly 300-500 ms to 20-30 ms on queries over millions of rows</li>
-            <li><span>Applied AI</span>RAG, structured outputs and model evaluation, from CrackD to a six-model dissertation benchmark</li>
-            <li><span>End to end</span>Took CrackD from a hackathon prototype to a product with 25+ testers, frontend to backend</li>
-          </ul>
         </div>
-        <div class="hd-panel" data-i="1">
-          <h3>Then I'd love to learn from you.</h3>
-          <p>If you're open to mentoring someone enthusiastic, I'd like to grow into product management, <b>starting a step below</b>: an associate or junior product role where I can learn how it's done properly.</p>
-          <div class="traits"><span>I genuinely like meetings</span><span>I love team brainstorms</span><span>Calm across many workloads</span></div>
-          <ul class="proof">
-            <li><span>Listening to users</span>Turned feedback from 25+ CrackD testers into a 61-issue backlog, then planned it across multiple sprints to take CrackD to MVP</li>
-            <li><span>Pitching</span>Kept the Boffin's Den pitch short, then let the judges use the live product instead of walking them through the architecture, the only finalist to do so. It won Champion and Most Valuable Product</li>
-            <li><span>Delivery</span>Took work from requirements to release with several teams at Norstella</li>
-            <li><span>People</span>Ran weekly sport sessions for 15+ students as a Student Activator, many of them first-timers</li>
-          </ul>
-        </div>
-      </div>
-      <div class="anywhere"><svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="14" cy="14" r="11"/><path d="M3 14h22M14 3c3.2 3.2 4.6 7 4.6 11S17.2 21.8 14 25c-3.2-3.2-4.6-7-4.6-11S10.8 6.2 14 3z"/></svg><span><b>Either way, I'm ready to move.</b> Open to relocating anywhere in the world.</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="path wrap" id="path" data-chap="Path" data-bg="#f7f7f4" data-fg="#141414" data-surf="#ffffff" data-acc="#141414">
-  <div class="sec-head"><h2>The path so far.</h2><p>Select a line. Dots mark the ones with photos.</p></div>
-  <div class="gantt" id="gantt"><div class="g-axis" id="gAxis"></div></div>
-  <div class="g-detail" id="gDetail" aria-live="polite"></div>
-</section>
-
-<section class="specs wrap" id="specs" data-chap="Specs" data-bg="#f7f7f4" data-fg="#141414" data-surf="#ffffff" data-acc="#141414">
-  <div class="sec-head"><h2>Specifications.</h2><p>Everything else, in one place.</p></div>
-  <div class="sp-row"><h3>Education</h3><div class="sp-cells"><div><b>MSc Artificial Intelligence and Machine Learning</b><span>University of Birmingham · Sep 2025 to Sep 2026</span></div><div><b>B.Tech Computer Science and Engineering</b><span>Vellore Institute of Technology, AP · 2019 to 2023</span></div><div><b>LangChain, LangGraph and LangSmith workshop</b><span>PwC x University of Birmingham · Feb 2026</span></div></div></div>
-  <div class="sp-row"><h3>Experience</h3><div class="sp-cells"><div><b>Software Developer, Norstella</b><span>Apr 2024 to Sep 2025 · pharmaceutical analytics SaaS</span></div><div><b>Student Activator, University of Birmingham</b><span>Active Residences · Apr to Jul 2026 · weekly sessions for 15+ students</span></div></div></div>
-  <div class="sp-row"><h3>Recognition</h3><div class="sp-cells"><div><b>Champion and Most Valuable Product</b><span>Boffin's Den, Google Cloud Agentic AI Hackathon · Mar 2026</span></div><div><b>5th place</b><span>Google Cloud Agentic AI Hackathon qualifier · Mar 2026</span></div><div><b>4th place</b><span>Google AI Playground, London, team BrumMind · Dec 2025</span></div></div></div>
-  <div class="sp-row"><h3>Languages and frameworks</h3><div class="sp-tags"><span>Python</span><span>TypeScript</span><span>JavaScript</span><span>React</span><span>Node.js</span><span>FastAPI</span><span>Next.js</span></div></div>
-  <div class="sp-row"><h3>Applied AI</h3><div class="sp-tags"><span>LLM APIs</span><span>Retrieval-augmented generation</span><span>Structured outputs</span><span>LLM evaluation</span><span>Local models with Ollama</span><span>Google ADK</span><span>Vertex AI</span></div></div>
-  <div class="sp-row"><h3>Data and ML</h3><div class="sp-tags"><span>pandas</span><span>NumPy</span><span>scikit-learn</span><span>SciPy</span><span>statsmodels</span><span>TensorFlow and Keras</span><span>DuckDB</span></div></div>
-  <div class="sp-row"><h3>Delivery</h3><div class="sp-tags"><span>Docker</span><span>Azure DevOps</span><span>Git</span><span>Playwright</span><span>AWS Lambda and S3</span></div></div>
-  <div class="sp-row"><h3>Also built</h3><div class="sp-cells"><div><b>TalentLens</b><span>Resume screening with a weighted six-dimension scoring engine</span></div><div><b>Find a Friend</b><span>Travel-companion matching, with a genetic algorithm searching pairings across ~150 profiles</span></div></div></div>
-  <div class="sp-row"><h3>Availability</h3><div class="sp-cells"><div><b>Based in Birmingham, UK</b><span>Relocating anywhere in the world</span></div><div><b>Looking for</b><span>Applied AI, software or forward deployed engineering, or an associate product role</span></div></div></div>
-</section>
-
-<footer class="contact wrap" id="contact" data-chap="Contact" data-bg="#f7f7f4" data-fg="#141414" data-surf="#ffffff" data-acc="#141414">
-  <h2>Say hello,<br>in any colour.</h2>
-  <div class="c-row">
-    <button class="c-mail" id="copy">sriraj.paruchuru@gmail.com <span id="copyLbl">Copy</span></button>
-    <a class="c-link" href="https://www.linkedin.com/in/srirajparuchuru" target="_blank" rel="noopener">LinkedIn</a>
-    <a class="c-link" href="https://github.com/Sriraj-p" target="_blank" rel="noopener">GitHub</a>
-  </div>
-  <div class="fine"><span>© 2026 Sriraj Paruchuru · Birmingham, UK · Hand-written HTML, set in Host Grotesk at 90%</span><span>Render 4 · Combined</span></div>
-</footer>
-</main>
-
-<dialog class="rdlg" id="rdlg" aria-labelledby="rdT">
-  <div class="rd-in">
-    <button class="rd-x" id="rdX" aria-label="Close"><svg width="12" height="12" viewBox="0 0 12 12" stroke="currentColor" stroke-width="1.8"><path d="M1 1l10 10M11 1L1 11"/></svg></button>
-    <div class="rd-doc" aria-hidden="true"><b></b><i class="h"></i><i></i><i></i><i></i><i class="h"></i><i></i><i></i><i></i><i></i><i></i><i class="h"></i><i></i><i></i><i></i><i></i><i class="h"></i><i></i><i></i><i></i><i></i></div>
-    <div>
-      <h3 id="rdT">My resume</h3>
-      <p>One page: Norstella, the MSc, CrackD and the rest. Updated September 2026.</p>
-      <div class="rd-act">
-        <a class="run" href="assets/Sriraj_Paruchuru_Resume.pdf" target="_blank" rel="noopener">View resume <i>↗</i></a>
-        <a class="rd-ghost" href="assets/Sriraj_Paruchuru_Resume.pdf" download="Sriraj_Paruchuru_Resume.pdf">Download resume <i>↓</i></a>
-      </div>
-      <small>PDF · 60 KB · Sriraj_Paruchuru_Resume.pdf</small>
-    </div>
-  </div>
-</dialog>
-
-<dialog class="lb" id="lb" aria-label="Photo viewer"><img id="lbImg" alt=""><div class="lb-bar"><span id="lbCap"></span><div><button id="lbPrev" aria-label="Previous photo">←</button><button id="lbNext" aria-label="Next photo">→</button><button id="lbX">Close</button></div></div></dialog>
+</div>
+<dialog class="lb" id="lb" aria-label="Photo"><img id="lbImg" alt=""><p id="lbCap"></p></dialog>
 
 <script>
 (()=>{
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)), lerp=(a,b,t)=>a+(b-a)*t, sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),lerp=(a,b,t)=>a+(b-a)*t,sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const easeOut=t=>1-Math.pow(1-t,3), easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2, smooth=t=>t*t*(3-2*t);
+const easeOut=t=>1-Math.pow(1-t,3),easeIO=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,smooth=t=>t*t*(3-2*t);
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 function countUp(el,to,ms=900,fmt=v=>Math.round(v).toLocaleString('en-GB')){const from=parseFloat(el.dataset.v||0),t0=performance.now();el.dataset.v=to;const f=n=>{const t=reduce?1:clamp((n-t0)/ms,0,1);el.textContent=fmt(lerp(from,to,easeOut(t)));if(t<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
-const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
-const rgb=a=>`rgb(${a.map(Math.round).join(',')})`;
+const mobile=()=>innerWidth<=900;
 
-const reel=$('#work'), stage=$('#stage'), projs=$$('#stage .proj'), expEl=$('#experience'), N=projs.length;
-let pinned=false, stepLen=0, active=-1;
+/* ================= palettes (the live site's project colours) ================= */
+const PAL={
+ start:['#c6d6e2','#102030','#ecf3f8','#2b67a6'],
+ nor:['#d9e2ea','#0e1a26','#f1f5f8','#1e64a8'],
+ ckd:['#cdd9c5','#1c2b20','#f4f7f1','#4f7a5a'],
+ dis:['#16213d','#eef1f8','#1f2c4f','#8fb4ff'],
+ fpl:['#0f5132','#eaf6ee','#156a42','#d7ff5f'],
+ rep:['#c9e4ea','#0f2a30','#f2f9fa','#0e7c86'],
+ ret:['#f2e3a4','#2b2408','#fbf4d6','#b8430f'],
+ med:['#e4def4','#221a38','#f8f6fd','#6b54c9'],
+ trk:['#eadfcf','#2e2417','#fbf7f1','#a0612b'],
+ dpf:['#111111','#f2f2f2','#1c1c1c','#ff5c5c']};
 
-/* ---------- hero sticks, dock, pips ---------- */
-const ART={
- 'experience':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet"><text x="34" y="52" font-size="13" font-family="Host Grotesk" fill="currentColor" opacity=".7">before</text><text x="266" y="52" font-size="13" font-family="Host Grotesk" fill="currentColor" text-anchor="end" opacity=".7">~400 ms</text><rect x="34" y="62" width="232" height="12" rx="6" fill="rgba(255,255,255,.6)"/><rect x="34" y="62" width="222" height="12" rx="6" fill="currentColor" opacity=".45"/><text x="34" y="122" font-size="13" font-family="Host Grotesk" fill="currentColor" opacity=".7">after</text><text x="266" y="122" font-size="13" font-family="Host Grotesk" fill="currentColor" text-anchor="end" font-weight="700">25 ms</text><rect x="34" y="132" width="232" height="12" rx="6" fill="rgba(255,255,255,.6)"/><rect x="34" y="132" width="16" height="12" rx="6" fill="#ffe14a" stroke="currentColor" stroke-width="1.5"/>${[0,1,2,3].map(r=>`<rect x="34" y="${166+r*12}" width="${[150,120,170,90][r]}" height="5" rx="2.5" fill="currentColor" opacity=".18"/>`).join('')}</svg>`,
- 'p-crackd':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet">${[70,90,54,82,63].map((v,i)=>`<rect x="34" y="${34+i*30}" width="232" height="10" rx="5" fill="rgba(255,255,255,.6)"/><rect x="34" y="${34+i*30}" width="${v*2.32}" height="10" rx="5" fill="${i===2?'#ffe14a':'currentColor'}"/>`).join('')}</svg>`,
- 'p-onesize':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet">${Array.from({length:66},(_,i)=>{const c=i%6,r=Math.floor(i/6);return `<circle cx="${48+c*41}" cy="${22+r*17}" r="4.2" fill="${(c*7+r*3)%11===0?'#ffe14a':'#f2f2ef'}" opacity="${.35+((c+r)%4)*.18}"/>`}).join('')}</svg>`,
- 'p-fpl':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet"><rect x="26" y="20" width="248" height="180" rx="12" fill="#e7efe6"/><path d="M26 110h248M150 20v180" stroke="#c4d3c3"/><circle cx="150" cy="110" r="26" fill="none" stroke="#c4d3c3"/><polyline points="40,170 80,150 120,158 160,120 200,112 240,84 262,70" fill="none" stroke="#131416" stroke-width="3" stroke-linejoin="round"/><polyline points="40,172 80,160 120,140 160,142 200,122 240,110 262,100" fill="none" stroke="#131416" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/></svg>`,
- 'p-reporter':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet">${[0,1,2].map(k=>`<g transform="translate(${30+k*18} ${30+k*22}) rotate(${-4+k*3})"><rect width="200" height="130" rx="10" fill="#fff" stroke="rgba(19,20,22,.12)"/>${[0,1,2,3,4].map(j=>`<rect x="18" y="${22+j*20}" width="${[150,120,160,90,140][j]}" height="7" rx="3.5" fill="${k===2&&j===2?'#131416':'#e4e4e0'}"/>`).join('')}</g>`).join('')}</svg>`,
- 'p-retail':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet"><rect x="152" y="40" width="130" height="150" rx="8" fill="#fff" opacity=".45"/><polyline points="20,90 50,86 80,94 110,84 140,90 160,140 190,150 220,146 250,152 280,148" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><circle cx="160" cy="140" r="7" fill="#ffe14a" stroke="currentColor" stroke-width="3"/><text x="170" y="62" font-size="13" font-family="Host Grotesk" fill="currentColor">sustained drop</text></svg>`,
- 'p-med':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet"><defs><radialGradient id="stMri"><stop offset="0" stop-color="#6d6f75"/><stop offset=".7" stop-color="#2a2b2f"/><stop offset="1" stop-color="#111214"/></radialGradient></defs><ellipse cx="150" cy="112" rx="96" ry="86" fill="url(#stMri)"/><path d="M168 76c20 4 30 22 22 38s-30 20-42 8-4-50 20-46z" fill="rgba(255,225,74,.25)" stroke="#ffe14a" stroke-width="2.5"/></svg>`,
- 'p-tracker':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet"><rect x="30" y="24" width="240" height="176" rx="10" fill="#fff" stroke="rgba(19,20,22,.12)"/>${[0,1,2,3,4,5].map(r=>`<path d="M30 ${54+r*24}h240" stroke="rgba(19,20,22,.08)"/>`).join('')}<path d="M110 24v176M190 24v176" stroke="rgba(19,20,22,.08)"/><rect x="31" y="127" width="238" height="23" fill="#ffe14a"/>${[0,1,2,3,4,5].map(r=>`<rect x="42" y="${36+r*24}" width="${40+(r*17)%30}" height="6" rx="3" fill="#cfd0cc"/><rect x="122" y="${36+r*24}" width="${36+(r*11)%34}" height="6" rx="3" fill="#cfd0cc"/>`).join('')}</svg>`,
- 'p-diffproof':`<svg viewBox="0 0 300 220" preserveAspectRatio="xMidYMax meet" font-family="ui-monospace,Consolas,monospace" font-size="12.5"><rect x="26" y="28" width="248" height="164" rx="12" fill="#fff"/><rect x="26" y="72" width="248" height="24" fill="#ffe0dc"/><rect x="26" y="96" width="248" height="24" fill="#dff3e4"/><text x="40" y="56" fill="#6a6c72">def eligible(score):</text><text x="40" y="89" fill="#131416">-   return score > 0.80</text><text x="40" y="113" fill="#131416">+   return score > 0.85</text><text x="40" y="150" fill="#6a6c72">mutant: > becomes >=</text><rect x="40" y="160" width="84" height="20" rx="10" fill="#131416"/><text x="52" y="174" fill="#ffe14a">survived</text></svg>`
-};
-const CARD={
- 'experience':['Experience · 2024 to 2025','Norstella','Two pharmaceutical analytics platforms, released every 3-4 days, with filtered data down to 20-30 ms.'],
- 'p-crackd':['Product · 2026','CrackD','Interview prep that reads your CV the way both a recruiter and an ATS would.'],
- 'p-onesize':['Research · MSc dissertation','One Size Might Not Fit All','Is a model that handles grant rules well just as good with housing complaints?'],
- 'p-fpl':['Side project · live','FPL Duel','My model’s fantasy football team against mine, all season.'],
- 'p-reporter':['Tool · local-first','The R.E.P.O.R.T.E.R.','News articles in, checked and source-linked claims out. On a laptop, with no paid APIs.'],
- 'p-retail':['Analysis','Retail Behavioural Anomaly Detection','Customers stop coming for different reasons. Some of them aren’t your fault.'],
- 'p-med':['Deep learning','MedHealth','Brain tumour segmentation and pneumonia detection, small enough for a phone.'],
- 'p-tracker':['Browser extension','Job Application Tracker','Press Apply on any job site and the role lands in your own Google Sheet.'],
- 'p-diffproof':['In design','DiffProof','AI writes diffs in seconds. Would any of your tests notice them breaking?']
-};
-$('#sticks').innerHTML=[expEl,...projs].map((p,i)=>`<button class="stick" style="--c:${p.dataset.bg};--t2:${p.dataset.fg};--i:${i}" data-i="${i}" aria-label="${CARD[p.id][1]}: ${CARD[p.id][2]}"><em><small>${CARD[p.id][0]}</small><b>${CARD[p.id][1]}</b><q>${CARD[p.id][2]}</q></em><i class="sa" aria-hidden="true">${ART[p.id]||''}</i><span>${CARD[p.id][1]}</span></button>`).join('');
-$('#dDots').innerHTML=projs.map((p,i)=>`<button style="--c:${p.dataset.bg}" data-i="${i}" aria-label="Go to ${p.dataset.name}"><span>${p.dataset.name}</span></button>`).join('');
-$('#pips').innerHTML=projs.map(()=>'<i></i>').join('');
-function goTo(i){const y=pinned?reel.offsetTop+(i+.2)*stepLen:projs[i].getBoundingClientRect().top+scrollY-40;scrollTo({top:y,behavior:reduce?'auto':'smooth'})}
-$$('#dDots button').forEach(b=>b.onclick=()=>goTo(+b.dataset.i));
-$$('.stick').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(i===0)expEl.scrollIntoView({behavior:reduce?'auto':'smooth'});else goTo(i-1)});
+/* ================= the record ================= */
+const SRC={
+ nor:{n:'Norstella',k:'Software Developer · Apr 2024 to Sep 2025',c:'#1e64a8'},
+ ckd:{n:'CrackD',k:'Interview prep product · 2026',c:'#4f8a4a'},
+ hak:{n:'Hackathons',k:'Google events · 2025 to 2026',c:'#c08f05'},
+ dis:{n:'MSc dissertation',k:'One Size Might Not Fit All',c:'#3a55b0'},
+ fpl:{n:'FPL Duel',k:'Side project · 2026/27 season',c:'#6d8a0c'},
+ rep:{n:'The R.E.P.O.R.T.E.R.',k:'Local LLM pipeline',c:'#0e7c86'},
+ dpf:{n:'DiffProof',k:'In design',c:'#d0433f'},
+ ret:{n:'Retail analysis',k:'Behavioural anomaly detection',c:'#c0571a'},
+ med:{n:'MedHealth',k:'Medical imaging models',c:'#6b54c9'},
+ trk:{n:'Job Application Tracker',k:'Browser extension',c:'#9a5b26'},
+ uni:{n:'University',k:'Birmingham · VIT-AP · PwC',c:'#6f7c86'},
+ me:{n:'In his own words',k:'Goals, habits and logistics',c:'#2a2f35'}};
+const P={
+ nor1:['nor','Nearly 18 months on two pharmaceutical analytics platforms in React, TypeScript and Node.js, taking work from requirements through testing on 3-4 day release cycles.'],
+ nor2:['nor','Better backend routing and server-side filtering cut filtered responses to 20-30 ms, down from roughly 300-500 ms, on queries scanning millions of rows across several databases.'],
+ nor3:['nor','Excel export, AWS Lambda and S3 delivery with validation and error handling, plus Auth0 SSO, JWT and role-based access for pharmaceutical clients.'],
+ nor4:['nor','Releases every 3-4 days with Playwright checks, Docker and Azure DevOps.'],
+ nor5:['nor','Helped design and build internal AI tools with senior colleagues.'],
+ nor6:['nor','Norstella taught me to think in processes: where the data comes from, where it can break, and who is relying on it when it does.'],
+ ckd1:['ckd','Reads a CV against a job description the way a recruiter and an ATS would, then runs a mock interview that goes straight for the gaps.'],
+ ckd2:['ckd','8 scores and 4 feedback cards from strict JSON-schema output, replacing fragile regex.'],
+ ckd3:['ckd','Over 60% of 25+ student and professional testers said they use it now and want to keep going.'],
+ ckd4:['ckd','A 61-issue backlog from tester feedback, sequenced into a multi-sprint roadmap to take CrackD to MVP.'],
+ ckd5:['ckd','Took CrackD from a hackathon prototype to a product with 25+ testers, frontend to backend.'],
+ hak1:['hak','Champion and Most Valuable Product, Boffin\'s Den, Google Cloud Agentic AI Hackathon, March 2026.',['assets/boffins-certificate.webp','assets/boffins-group.jpg']],
+ hak2:['hak','Kept the pitch short, then handed the judges the live CrackD site instead of walking them through the architecture, the only finalist to do so.',['assets/boffins-stage.jpg']],
+ hak3:['hak','5th in the hackathon qualifier with a multi-agent CRM on Google ADK, Vertex AI, BigQuery and RAG.'],
+ hak4:['hak','4th place at Google AI Playground in London with team BrumMind, building a multimodal Gemini app, December 2025.'],
+ dis1:['dis','3,120 benchmark requests across 6 low-cost models, 350 cases and 5 rulebooks, with one retrieval system held fixed and only the model swapped.'],
+ dis2:['dis','Every citation checked against the exact passage it names.'],
+ dis3:['dis','Answers, asks, or escalates to a person, based on three confidence signals.'],
+ dis4:['dis','34 public documents and 510 contracts, searched in three passes: rules, exceptions, then authority.'],
+ fpl1:['fpl','The optimiser picks the players. An LLM writes the headlines and can\'t change a number.'],
+ fpl2:['fpl','An exact optimiser for a legal £100m squad, XI, captain and bench, with 7 seasons of history and no peeking at the future.'],
+ rep1:['rep','Collects reporting from registered sources, pulls out claims, and throws away any claim it can\'t quote word for word.'],
+ rep2:['rep','Qwen 2.5 7B through Ollama, stored in DuckDB with full provenance, for £0 in API costs.'],
+ dpf1:['dpf','Mutation testing on changed lines only, fast enough for every pull request.'],
+ dpf2:['dpf','LLM-written tests only count after they run.'],
+ ret1:['ret','3,000 synthetic customers, 78,000 transactions and 26 weeks: a z-score flag, a sustained-drop check, then a decision tree that labels each cause internal, external or unknown.'],
+ med1:['med','M-Net with Dice loss reached 94.1% accuracy on 3,064 MRI slices, and the best of four pneumonia models reached 98.6% on ~5,800 chest X-rays.'],
+ med2:['med','98 MB to 33 MB with TensorFlow Lite, so brain tumour segmentation runs on an Android phone.'],
+ trk1:['trk','Press Apply on any of ~150 recognised job sites and the role lands in a Google Sheet you own. Nothing is logged until you confirm.'],
+ uni1:['uni','MSc Artificial Intelligence and Machine Learning, University of Birmingham, Sep 2025 to Sep 2026.'],
+ uni2:['uni','B.Tech Computer Science and Engineering, Vellore Institute of Technology, AP, 2019 to 2023.'],
+ uni3:['uni','Student Activator at the University of Birmingham: weekly sport sessions for 15+ students, many of them first-timers, Apr to Jul 2026.'],
+ uni4:['uni','PwC x University of Birmingham workshop on LangChain, LangGraph and LangSmith, February 2026.'],
+ me1:['me','The long-term goal is AI product management: working out what\'s worth building, with the people who build it.'],
+ me2:['me','Next, an applied AI, software or forward deployed engineering role on an AI-native team, where someone more experienced can show me how it\'s done well.'],
+ me3:['me','Then an associate or junior product role, starting a step below, where I can learn product management properly.'],
+ me4:['me','I keep up with the latest in AI, I test what the model returns, and I prototype fast.'],
+ me5:['me','I genuinely like meetings, I love team brainstorms, and I stay calm across many workloads.'],
+ me6:['me','Based in Birmingham, UK. Open to relocating anywhere in the world.']};
+const PIDS=Object.keys(P),SIDS=Object.keys(SRC);
 
-/* ---------- layout mode ---------- */
-function layout(){
-  pinned=innerWidth>=1000&&innerHeight>=700&&!reduce;
-  reel.classList.toggle('pin',pinned);
-  reel.style.height=pinned?(N*78+100)+'vh':'';
-  stepLen=pinned?(reel.offsetHeight-innerHeight)/N:0;
-  buildStops();sizeDots();
-}
+const QS=[
+ {id:'check',q:'Does he check what the model returns?',kw:['check','verif','model','llm','hallucin','trust','eval','ai ','agent','rag','accura'],d:'answer',m:[.95,.93,.9],
+  a:'It\'s the thread through almost everything he builds. CrackD\'s scores come from strict JSON-schema output instead of regex {ckd2}. His dissertation checks every citation against the exact passage it names {dis2}. FPL Duel lets an LLM write the headlines but never touch a number {fpl1}. The R.E.P.O.R.T.E.R. throws away any claim it can\'t quote word for word {rep1}, and DiffProof only counts LLM-written tests after they run {dpf2}.'},
+ {id:'ship',q:'Can he ship production software?',kw:['ship','production','deliver','release','engineer','code','coding','developer','software','experience','job','norstella','react','backend','fast'],d:'answer',m:[.92,.9,.88],
+  a:'Yes. He spent nearly 18 months on two pharmaceutical analytics platforms at Norstella, taking work from requirements through testing {nor1} and releasing every 3-4 days {nor4}. One of his changes cut filtered responses from roughly 300-500 ms to 20-30 ms {nor2}. He has since taken CrackD from a hackathon prototype to a product with 25+ testers {ckd5}.'},
+ {id:'next',q:'What does he want to do next?',kw:['next','want','goal','looking','role','mentor','future','career','plan','ambition','aim','seeking','pm '],d:'answer',m:[.96,.95,.94],
+  a:'Two steps, in this order. First, an applied AI, software or forward deployed engineering role on an AI-native team, where someone more experienced can show him how it\'s done well {me2}. Then an associate or junior product role, starting a step below {me3}. The long-term goal is AI product management {me1}.'},
+ {id:'product',q:'Does he have product instincts?',kw:['product','instinct','user','feedback','roadmap','pitch','priorit','backlog','customer','strategy','sense'],d:'answer',m:[.84,.88,.85],
+  a:'Some, and he wants to learn the rest properly {me3}. He turned feedback from 25+ CrackD testers into a 61-issue backlog and a multi-sprint roadmap {ckd4}, and over 60% of those testers want to keep using it {ckd3}. At Boffin\'s Den he handed the judges the live product instead of explaining the architecture {hak2}. It won Champion and Most Valuable Product {hak1}.'},
+ {id:'team',q:'What is he like to work with?',kw:['like to work','work with','team','person','people','personality','culture','collaborat','meeting','communicat','attitude','soft skill'],d:'answer',m:[.72,.8,.82],
+  a:'Partly self-reported, so read it that way: he says he genuinely likes meetings and team brainstorms, and stays calm across many workloads {me5}. The record backs up the team part. He took work from requirements to release at Norstella {nor1}, helped build internal AI tools with senior colleagues {nor5}, and ran weekly sport sessions for 15+ students {uni3}.'},
+ {id:'won',q:'Has he won anything?',kw:['won','win','award','hackathon','prize','compet','recogni','achiev','boffin'],d:'answer',m:[.96,.94,.95],
+  a:'Champion and Most Valuable Product at Boffin\'s Den, the final of the Google Cloud Agentic AI Hackathon, in March 2026 {hak1}. He also placed 5th in that hackathon\'s qualifier {hak3} and 4th at Google AI Playground in London {hak4}.'},
+ {id:'ml',q:'Can he do machine learning, not just LLMs?',kw:['machine learning','ml','deep learning','tensorflow','vision','model training','statistics','data science','classical','scikit','anomaly'],d:'answer',m:[.9,.9,.88],
+  a:'Yes. MedHealth\'s M-Net reached 94.1% on 3,064 MRI slices, and the best of four pneumonia models reached 98.6% {med1}, shrunk from 98 MB to 33 MB to run on a phone {med2}. His retail analysis used z-scores, a sustained-drop check and a decision tree over 78,000 transactions {ret1}.'},
+ {id:'move',q:'Would he relocate?',kw:['relocat','move','based','location','remote','city','country','abroad','travel','where is he',' live '],d:'answer',m:[.97,.96,.96],
+  a:'Yes. He\'s based in Birmingham, UK, and open to relocating anywhere in the world {me6}.'},
+ {id:'fit',q:'Is he a fit for my team?',kw:['fit','my team','suitable','right for','good for','should i','hire him','hire','hiring','join'],d:'clarify',m:[.48,.7,.4],
+  a:'That depends on one thing the question doesn\'t say: what you\'re hiring for {me2} {me3}.',clar:[['Someone to build','ship'],['Someone to grow into product','product']]}];
+/* answered when typed, but not shown as a suggestion */
+const QHIDDEN=[
+ {id:'edu',q:'What did he study?',kw:['study','studied','degree','msc','masters','master','b tech','btech','bachelor','education','university','college','qualif','course','dissertation','thesis'],d:'answer',m:[.95,.94,.95],
+  a:'An MSc in Artificial Intelligence and Machine Learning at the University of Birmingham {uni1}, after a B.Tech in Computer Science and Engineering at VIT-AP {uni2}. His dissertation benchmarked 6 low-cost models inside one fixed retrieval system {dis1}, and he took the PwC workshop on LangChain, LangGraph and LangSmith {uni4}.'}];
+const QX={};[...QS,...QHIDDEN].forEach(q=>QX[q.id]=q);
 
-/* ---------- colour engine: continuous blend between stops ---------- */
-let stops=[];
-function buildStops(){
-  stops=[];const vh=innerHeight;
-  const push=(y,el)=>stops.push({y,c:['bg','fg','surf','acc'].map(k=>hex(el.dataset[k])),el});
-  push(0,$('#top'));
-  if(pinned)projs.forEach((p,i)=>push(reel.offsetTop+(i+.5)*stepLen,p));
-  else projs.forEach(p=>{const r=p.getBoundingClientRect();push(r.top+scrollY+r.height/2-vh/2,p)});
-  $$('main>section[data-bg]:not(#top),footer[data-bg]').forEach(s=>{const r=s.getBoundingClientRect(),top=r.top+scrollY;push(Math.max(1,top+Math.min(r.height,vh)/2-vh/2),s);if(r.height>vh*1.5)push(top+r.height-vh*1.05,s)});
-  stops.sort((a,b)=>a.y-b.y);for(let i=1;i<stops.length;i++)if(stops[i].y<=stops[i-1].y)stops[i].y=stops[i-1].y+1;
-}
-let lastKey='';
-function paint(){
-  const y=scrollY;let i=0;while(i<stops.length-1&&stops[i+1].y<=y)i++;
-  const a=stops[i],b=stops[Math.min(i+1,stops.length-1)];
-  let t=b===a?0:clamp((y-a.y)/(b.y-a.y),0,1);t=smooth(clamp((t-.28)/.44,0,1));
-  const cs=a.c.map((ca,k)=>ca.map((v,j)=>lerp(v,b.c[k][j],t)));
-  const key=cs.flat().map(Math.round).join();if(key===lastKey)return;lastKey=key;
-  ['--bg','--fg','--surf','--acc'].forEach((v,k)=>document.documentElement.style.setProperty(v,rgb(cs[k])));
-  $('#themeColor').content=rgb(cs[0]);
-}
+/* ================= projects (copy from the live site) ================= */
+const PROJ={
+ nor:{t:'Norstella',kind:'Experience · Software Developer',sub:'Strategic Intelligence and Enterprise Value platform teams · April 2024 to September 2025',num:['','20-30 ms','filtered responses, down from roughly 300-500 ms, on queries scanning millions of rows across several databases.'],lead:'Nearly 18 months on two pharmaceutical analytics platforms in React, TypeScript and Node.js, taking work from requirements through testing on 3-4 day release cycles.',facts:['<b>Faster data:</b> better backend routing and server-side filtering cut filtered responses to 20-30 ms.','<b>Excel export, AWS Lambda and S3</b> delivery with validation and error handling.','<b>Auth0 SSO, JWT and role-based access</b> for pharmaceutical clients.','<b>Releases every 3-4 days</b> with Playwright checks, Docker and Azure DevOps.','Helped design and build <b>internal AI tools</b> with senior colleagues.'],toy:'ns',place:'nor'},
+ ckd:{t:'CrackD',kind:'Product · 2026',num:['Over','60%','of 25+ student and professional testers said they use it now and want to keep going.'],lead:'Reads a CV against a job description the way a recruiter and an ATS would, then runs a mock interview that goes straight for the gaps.',facts:['<b>Champion and Most Valuable Product</b>, Boffin\'s Den, Google Cloud Agentic AI Hackathon, March 2026.','<b>8 scores and 4 feedback cards</b> from strict JSON-schema output, replacing fragile regex.','A <b>61-issue backlog</b> from tester feedback, sequenced into a multi-sprint roadmap to take CrackD to MVP.'],acts:`<button data-lb="assets/boffins-stage.jpg" data-cap="Demoing CrackD at Boffin's Den, University of Birmingham, March 2026"><img src="assets/boffins-stage.jpg" alt="">See the pitch →</button><a href="https://github.com/Sriraj-p/CrackD" target="_blank" rel="noopener">GitHub ↗</a>`,toy:'ck',place:'peak'},
+ dis:{t:'One Size Might Not Fit All',kind:'Research · MSc dissertation',num:['','3,120','benchmark requests across 6 low-cost models, 350 cases and 5 rulebooks.'],lead:'Is a cheap model that\'s reliable on grant rules just as reliable on housing complaints? I held one retrieval system fixed and swapped only the model.',facts:['<b>34 public documents and 510 contracts</b>, searched in three passes: rules, exceptions, then authority.','Every citation <b>checked against the exact passage</b> it names.','Answers, asks, or <b>escalates to a person</b>, based on three confidence signals.'],toy:'os',place:'dis'},
+ fpl:{t:'FPL Duel',kind:'Side project · live in 2026/27',num:['','7','seasons of history behind every pick, with no peeking at the future.'],lead:'xGesus himself, a model-run fantasy team, plays Bayer Neverlosin, managed by me. The optimiser picks the players. An LLM writes the headlines and can\'t change a number.',facts:['<b>An exact optimiser</b> for a legal £100m squad, XI, captain and bench.','The clean <b>head-to-head starts in Gameweek 3</b>.'],toy:'fp',place:'fpl'},
+ rep:{t:'The R.E.P.O.R.T.E.R.',kind:'Tool · runs on a laptop',acro:'An LLM-Powered Web Intelligence Pipeline focusing on <b>R</b>etrieval · <b>E</b>xtraction · <b>P</b>rovenance · <b>O</b>rganization · <b>R</b>eliability · <b>T</b>emporal <b>E</b>vidence · <b>R</b>easoning',num:['','£0','in API costs. A local model does all the reading.'],lead:'Collects reporting from registered sources, pulls out claims, and throws away any claim it can\'t quote word for word.',facts:['<b>Qwen 2.5 7B through Ollama</b>, stored in DuckDB with full provenance.','<b>NLP under the hood:</b> main-text extraction, near-duplicate detection with SimHash, and schema-constrained claim extraction where every claim must quote its source.','Feeds <b>FPL Duel</b> team news and <b>CrackD</b> company context.'],toy:'rp',place:'rep'},
+ ret:{t:'Why did they stop coming?',kind:'Analysis · retail behavioural anomaly detection',num:['','3,000','synthetic customers, 78,000 transactions, 26 weeks, 9 behaviour types.'],lead:'Retail Behavioural Anomaly Detection asks why customers leave, and whether it was the shop\'s fault.',facts:['<b>Z-score flag, sustained-drop check, then a decision tree</b> over price, stock, weather and calendar.','Each cause labelled <b>internal, external or unknown</b>, with a response to match.'],toy:'rt',place:'ret'},
+ med:{t:'MedHealth',kind:'Deep learning',num:['','33 MB','down from 98 MB, so brain tumour segmentation runs on an Android phone.'],lead:'Two deep learning pipelines, one for brain tumour segmentation and one for pneumonia detection, then the less glamorous work of making them run on a phone.',facts:['<b>M-Net with Dice loss:</b> 94.1% accuracy on 3,064 MRI slices.','<b>Four architectures compared</b> for pneumonia; the best reached 98.6% on ~5,800 chest X-rays.','<b>98 MB to 33 MB</b> with TensorFlow Lite, a 66% cut, for on-device inference.'],toy:'mh',place:'vit'},
+ trk:{t:'Job Application Tracker',kind:'Browser extension',num:['~','150','job boards, ATS platforms and staffing firms it recognises out of the box.'],lead:'A Chrome and Edge extension I built for my own job search. Press Apply on any job site and the role lands in a Google Sheet you own.',facts:['Reads <b>schema.org JobPosting</b> data first, then falls back to text signals in several languages.','<b>Nothing is logged until you confirm</b>, so abandoned Easy Apply flows stay out of the sheet.','<b>Manifest V3</b> extension with a Google Apps Script backend.'],toy:'jt',place:'trk'},
+ dpf:{t:'DiffProof',kind:'In design',num:['','4','mutants on one changed line. The original tests catch one of them.'],lead:'AI writes code changes in seconds, and reviewers skim them. DiffProof breaks the changed lines on purpose and checks whether any test notices.',facts:['<b>Mutation testing on changed lines only</b>, fast enough for every pull request.','<b>LLM-written tests only count after they run.</b>'],toy:'dp',place:'dpf'}};
 
-/* ---------- active project ---------- */
-const dn=$('#dName');let dnCur='';
-function setDock(t){if(t===dnCur)return;dnCur=t;dn.classList.add('out');setTimeout(()=>{dn.textContent=t;dn.classList.remove('out');dn.classList.add('pre');void dn.offsetWidth;dn.classList.remove('pre')},200)}
-function setActive(i){
-  if(i===active)return;const prev=active;active=i;
-  projs.forEach((p,j)=>{p.classList.toggle('on',j===i);p.classList.toggle('was',j<i)});
-  $$('#dDots button').forEach((b,j)=>b.classList.toggle('on',j===i));
-  $$('#pips i').forEach((b,j)=>b.classList.toggle('on',j===i));
-  if(i<0)return;
-  setDock(projs[i].dataset.name);
-  const num=projs[i].querySelector('.num[data-n]');if(num){num.dataset.v=0;countUp(num,+num.dataset.n,1000,v=>(num.dataset.pre||'')+Math.round(v).toLocaleString('en-GB')+(num.dataset.suf||''))}
-  if(pinned)morphTo(projs[i].dataset.dots,projs[i].querySelector('.p-dots'));
-  autoplay(projs[i].querySelector('.toy').id);
-}
+/* ================= the map's places ================= */
+const PLACES={
+ vit:{x:-11.5,z:10.4,label:'VIT-AP',small:'2019 to 2023',cls:'',proj:'med'},
+ nor:{x:-5,z:4,label:'Norstella',small:'2024 to 2025',cls:'',proj:'nor'},
+ bham:{x:1,z:-1,label:'Birmingham',small:'2025 · MSc',cls:'',ch:3},
+ peak:{x:5,z:-6,label:'Boffin\'s Den',small:'March 2026 · CrackD',cls:'peak',proj:'ckd'},
+ next:{x:9,z:-10,label:'A mentor',small:'Next',cls:'future',ch:6},
+ prod:{x:13,z:-14,label:'Product',small:'Then',cls:'future',ch:7},
+ dis:{x:-1.6,z:-3.1,label:'One Size',cls:'camp',proj:'dis'},
+ fpl:{x:.4,z:2.3,label:'FPL Duel',cls:'camp',proj:'fpl'},
+ rep:{x:3.6,z:.8,label:'R.E.P.O.R.T.E.R.',cls:'camp',proj:'rep'},
+ dpf:{x:4.3,z:-2.2,label:'DiffProof',cls:'camp',proj:'dpf'},
+ trk:{x:-2.9,z:.2,label:'Job Tracker',cls:'camp',proj:'trk'},
+ ret:{x:-.9,z:1.3,label:'Retail',cls:'camp',proj:'ret'}};
+const PLACE_OF=p=>({me1:'prod',me3:'prod',me6:'bham',uni2:'vit'})[p]||({nor:'nor',ckd:'peak',hak:'peak',dis:'dis',fpl:'fpl',rep:'rep',dpf:'dpf',ret:'ret',med:'vit',trk:'trk',uni:'bham',me:'next'})[P[p][0]];
+const SRC_PROJ={nor:'nor',ckd:'ckd',hak:'ckd',dis:'dis',fpl:'fpl',rep:'rep',dpf:'dpf',ret:'ret',med:'med',trk:'trk'};
 
-/* ---------- dots ---------- */
-const DN=312;
-const D=Array.from({length:DN},()=>({x:0,y:0,r:0,a:0,c:0,fx:0,fy:0,fr:0,fa:0,tx:0,ty:0,tr:0,ta:0,tc:0}));
-function shape(key,W,H){
-  const out=[];const put=(x,y,r,c=0,a=1)=>out.push({x,y,r,c,a});
-  if(key==='crackd'){const g=Math.min(W/14,H/2.4);for(let i=0;i<25;i++){const row=i<13?0:1,col=i<13?i:i-13;put(g*.5+col*g,H/2-g*.55+row*g*1.1,g*.32,i<15?1:0,i<15?1:.35)}}
-  else if(key==='onesize'){const p=Math.min(H/13.5,W/40);for(let m=0;m<6;m++)for(let k=0;k<52;k++)put(p*.5+m*6*p+(k%4)*p,p*.5+Math.floor(k/4)*p,p*.3,0,.85)}
-  else if(key==='fpl'){const w=Math.min(W,H*3),F=[[.04,.5],[.24,.12],[.24,.37],[.24,.63],[.24,.88],[.5,.12],[.5,.37],[.5,.63],[.5,.88],[.76,.32],[.76,.68]];F.forEach(([x,y],i)=>put(x*w,y*H*.86+H*.07,i===9?H*.12:H*.075,i===9?1:0,1))}
-  else if(key==='reporter'){const g=Math.min(W/22,H/2);for(let i=0;i<18;i++){const grp=Math.floor(i/3),k=i%3;put(g*.6+grp*g*3.4+k*g*.75,H/2,g*.3,k===0?1:0,k===0?1:.3)}}
-  else if(key==='retail'){const s=[3,2.9,3.1,2.8,3,3.1,2.9,3,3,3.1,2.9,3,2.4,1.8,1.6,1.5,1.6,1.4,1.5,1.6,1.5,1.4,1.5,1.6,1.5,1.5];const g=Math.min(W/27,H/1.4);s.forEach((v,i)=>put(g*.5+i*g,H-(v/3.4)*H*.85,i===12?g*.3:g*.2,i===12?1:0,1))}
-  else if(key==='diffproof'){const r=H*.2;for(let i=0;i<4;i++)put(r+i*r*3.2,H/2,r,i===0?1:0,i===0?1:.9)}
-  else if(key==='med'){const g=Math.min(W/15,H/7.4);for(let i=0;i<98;i++)put(g*.5+(i%14)*g,g*.5+Math.floor(i/14)*g*1.02,g*.3,i<33?1:0,i<33?1:.28)}
-  else if(key==='tracker'){const g=Math.min(W/26,H/6.3);for(let i=0;i<150;i++){const hit=[3,17,29,44,58,71,90,104,123,141].includes(i);put(g*.5+(i%25)*g,g*.5+Math.floor(i/25)*g,hit?g*.34:g*.24,hit?1:0,hit?1:.4)}}
-  else if(key==='norstella'){const g=Math.min(W/44,H/3);for(let i=0;i<42;i++)put(g*.5+i*g,H*.3,g*.3,0,.55);for(let i=0;i<3;i++)put(g*.5+i*g,H*.72,g*.34,1,1)}
-  const n0=out[0]||{x:0,y:H/2,r:0};for(let i=out.length;i<DN;i++)out.push({x:n0.x,y:n0.y,r:0,c:0,a:0});
-  return out;
-}
-let dotCanvas=null,dotW=0,dotH=0,dotAnim=0,dotT0=0;
-function sizeDots(){$$('.p-dots').forEach(c=>{const r=c.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);c.width=Math.max(1,r.width*d);c.height=Math.max(1,r.height*d);c._d=d;c._w=r.width;c._h=r.height});
-  if(!pinned)projs.forEach(p=>drawStatic(p.querySelector('.p-dots'),p.dataset.dots));
-  else if(active>=0){const c=projs[active].querySelector('.p-dots');const T=shape(projs[active].dataset.dots,c._w,c._h);D.forEach((d,i)=>Object.assign(d,{x:T[i].x,y:T[i].y,r:T[i].r,a:T[i].a,c:T[i].c}));dotCanvas=c;drawDots()}}
-function cssColors(){const cs=getComputedStyle(document.documentElement);return [cs.getPropertyValue('--fg').trim(),cs.getPropertyValue('--acc').trim()]}
-function drawOn(c,list){const g=c.getContext('2d');g.setTransform(c._d,0,0,c._d,0,0);g.clearRect(0,0,c._w,c._h);const col=cssColors();
-  for(const d of list){if(d.a<.02||d.r<.2)continue;g.globalAlpha=d.a;g.fillStyle=col[d.c];g.beginPath();g.arc(d.x,d.y,d.r,0,6.2832);g.fill()}g.globalAlpha=1}
-function drawStatic(c,key){if(c&&c._w)drawOn(c,shape(key,c._w,c._h))}
-function drawDots(){if(dotCanvas)drawOn(dotCanvas,D)}
-function morphTo(key,c){dotCanvas=c;const T=shape(key,c._w,c._h);
-  D.forEach((d,i)=>{d.fx=d.x;d.fy=d.y;d.fr=d.r;d.fa=d.a;Object.assign(d,{tx:T[i].x,ty:T[i].y,tr:T[i].r,ta:T[i].a,tc:T[i].c})});
-  dotT0=performance.now();cancelAnimationFrame(dotAnim);
-  const f=n=>{let done=true;D.forEach((d,i)=>{const t=clamp((n-dotT0-(i%40)*6)/850,0,1);if(t<1)done=false;const e=easeIO(t);d.x=lerp(d.fx,d.tx,e);d.y=lerp(d.fy,d.ty,e);d.r=lerp(d.fr,d.tr,e);d.a=lerp(d.fa,d.ta,e);if(t>.5)d.c=d.tc});drawDots();if(!done)dotAnim=requestAnimationFrame(f)};
-  dotAnim=requestAnimationFrame(f)}
+/* ================= chapters ================= */
+const CH=[
+ {r:'Start',pal:'start',edge:8.4,route:0,cam:[[-4,22,22],[1,0,-2]],html:`<p class="kick mono"><span>Sriraj Paruchuru</span><span>Software engineer · Birmingham</span></p><h1>The map so far.</h1><p class="lead">Most portfolios show where someone has been. This one also marks where I'm headed, and the stretch I'd rather not map alone.</p><div class="ctas"><button class="btn" data-go="1">Walk the route →</button><button class="btn ghost" data-mode="ask">Ask the map</button></div><p class="hint mono">Scroll, swipe or use the arrow keys to walk. Press any flag to open it.</p>`},
+ {r:'VIT-AP',pal:'med',edge:8.4,route:.12,cam:[[-8.6,5.2,16.2],[-11,-.6,10]],html:`<p class="kick mono"><span>Trailhead · 2019 to 2023</span><span>01</span></p><h2>Where the trail starts.</h2><p class="txt"><b>B.Tech in Computer Science and Engineering</b> at Vellore Institute of Technology, AP. Four years of foundations, and the first deep learning work I shipped, later extended into MedHealth.</p><div class="stats"><div><b>94.1%</b><span>M-Net with Dice loss, on 3,064 MRI slices</span></div><div><b>98 → 33 MB</b><span>with TensorFlow Lite, so it runs on a phone</span></div></div><div class="camps"><button data-proj="med"><i></i>Open MedHealth</button></div>`},
+ {r:'Norstella',pal:'nor',edge:8.4,route:.42,cam:[[-1.8,7.4,12.4],[-4.6,.6,3.6]],html:`<p class="kick mono"><span>The climb · Apr 2024 to Sep 2025</span><span>02</span></p><h2>Eighteen months of production.</h2><p class="txt">Software Developer at <b>Norstella</b>, on two pharmaceutical analytics platforms in React, TypeScript and Node.js, taking work from requirements through testing.</p><div class="stats"><div><b>20-30 ms</b><span>filtered responses, down from roughly 300-500 ms over millions of rows</span></div><div><b>3-4 days</b><span>between releases, with Playwright, Docker and Azure DevOps</span></div></div><p class="quote">It taught me to think in processes: where the data comes from, where it can break, and who is relying on it when it does.</p><div class="camps"><button data-proj="nor"><i></i>Open Norstella</button></div>`},
+ {r:'Birmingham',pal:'dis',edge:8.4,route:.76,cam:[[4.8,8.4,6],[.8,-.6,-1.2]],html:`<p class="kick mono"><span>The valley · from Sep 2025</span><span>03</span></p><h2>A valley full of experiments.</h2><p class="txt"><b>MSc in AI and Machine Learning</b> at the University of Birmingham, Sep 2025 to Sep 2026. Most of what I build now has a language model inside it, so most of it also has a way of checking it. Press a flag, or one of these.</p><div class="camps">${['dis','fpl','rep','dpf','trk','ret'].map(k=>`<button data-proj="${k}" style="--c:${SRC[k].c}"><i></i>${PROJ[k].t}</button>`).join('')}</div>`},
+ {r:'Boffin\'s Den',pal:'ckd',edge:8.4,route:1,cam:[[9.6,6.4,2.4],[4.6,2.6,-6]],html:`<p class="kick mono"><span>Highest point so far · March 2026</span><span>04</span></p><h2>CrackD, at Boffin's Den.</h2><p class="txt">Interview prep that reads a CV the way a recruiter and an ATS would. It won <b>Champion and Most Valuable Product</b> at the Google Cloud Agentic AI Hackathon final. I kept the pitch short, then handed the judges the live site instead of walking them through the architecture, the only finalist to do so.</p><button class="photo" data-lb="assets/boffins-stage.jpg" data-cap="Demoing CrackD at Boffin's Den, March 2026"><img src="assets/boffins-stage.jpg" alt="Sriraj at the lectern, demoing CrackD" loading="lazy"></button><div class="stats"><div><b>25+</b><span>testers, and over 60% want to keep using it</span></div><div><b>61</b><span>issues from their feedback, planned into a multi-sprint roadmap</span></div></div><div class="camps"><button data-proj="ckd"><i></i>Open CrackD</button></div>`},
+ {r:'The edge',pal:'rep',edge:8.4,route:1,cam:[[8.2,7.4,1.6],[9,1,-9.5]],html:`<p class="kick mono"><span>Now</span><span>05</span></p><h2>Here, the map runs out.</h2><p class="txt">Everything past this point is blank paper. I could walk it alone, but I'd learn faster beside someone who has already been there.</p>`},
+ {r:'Next',pal:'dpf',edge:15.8,route:1,cam:[[13,6.6,-1.6],[9,1.4,-10]],html:`<p class="kick mono"><span>Step one · next</span><span>06</span></p><h2>Build, with a mentor.</h2><p class="txt">An <b>applied AI, software or forward deployed engineering</b> role on an AI-native team, where someone more experienced can show me how it's done well. Watch the map fill in.</p><div class="tags"><span>I keep up with the latest in AI</span><span>I test what the model returns</span><span>I prototype fast</span></div>`},
+ {r:'Product',pal:'ret',edge:24,route:1,cam:[[18.4,8,-3.4],[12.6,3.6,-13.6]],html:`<p class="kick mono"><span>Step two · after that</span><span>07</span></p><h2>Then, product.</h2><p class="txt">An associate or junior product role, <b>starting a step below</b>. The long-term goal is AI product management: working out what's worth building, with the people who build it.</p><div class="tags"><span>I genuinely like meetings</span><span>I love team brainstorms</span><span>Calm across many workloads</span></div><div class="stats"><div><b>61</b><span>CrackD issues from tester feedback, planned into sprints</span></div><div><b>15+</b><span>students at weekly sport sessions I ran as a Student Activator</span></div></div>`},
+ {r:'Say hello',pal:'start',edge:24,route:1,cam:[[8,24,18],[3,0,-5]],html:`<p class="kick mono"><span>Based in Birmingham, UK</span><span>Open to relocating anywhere</span></p><h2>Know the next stretch? Walk it with me.</h2><p class="txt">If your team builds with AI every day and you'd enjoy showing someone the way, I'd love to hear from you.</p><div class="ctas"><button class="btn" id="copy">sriraj.paruchuru@gmail.com <span>Copy</span></button><a class="btn ghost" href="https://www.linkedin.com/in/srirajparuchuru" target="_blank" rel="noopener">LinkedIn</a><a class="btn ghost" href="https://github.com/Sriraj-p" target="_blank" rel="noopener">GitHub</a><a class="btn ghost" href="assets/Sriraj_Paruchuru_Resume.pdf" target="_blank" rel="noopener">Resume ↗</a></div><p class="hint mono">Or ask the map anything first.</p>`}];
 
-/* ---------- scroll loop ---------- */
-const chapEls=$$('[data-chap]'), chap=$('#chap');let chapCur='';
-function setChap(t){if(t===chapCur)return;chapCur=t;chap.classList.add('out');setTimeout(()=>{chap.textContent=t?'/ '+t:' ';chap.classList.remove('out');chap.classList.add('pre');void chap.offsetWidth;chap.classList.remove('pre')},220)}
-function onScroll(){
-  const vh=innerHeight,max=document.documentElement.scrollHeight-vh;$('#prog').style.transform=`scaleX(${clamp(scrollY/max,0,1)})`;
-  paint();scrubUpdate();
-  const rr=reel.getBoundingClientRect();const inReel=rr.top<vh*.5&&rr.bottom>vh*.5;
-  $('#dock').classList.toggle('hide',!inReel);
-  if(pinned){
-    const p=clamp(-rr.top/(rr.height-vh),0,1);const f=p*N;const i=clamp(Math.floor(f),0,N-1);
-    setActive(rr.top>vh*.6?-1:i);
-    if(active>=0){const local=f-i;projs[active].style.setProperty('--par',((.5-local)*24).toFixed(1)+'px')}
-    if(active>=0)drawDots();
-  }else{
-    let i=-1;projs.forEach((p,j)=>{const r=p.getBoundingClientRect();if(r.top<vh*.55&&r.bottom>vh*.45)i=j});if(i>=0)setActive(i);
-    if(active>=0)drawStatic(projs[active].querySelector('.p-dots'),projs[active].dataset.dots);
-  }
-  let c='';chapEls.forEach(s=>{const r=s.getBoundingClientRect();if(r.top<vh*.45&&r.bottom>vh*.45)c=s.dataset.chap});
-  if(c==='Work'&&active>=0)c='Work · '+projs[active].dataset.name;setChap(c);
-  ticking=false;
-}
-let ticking=false;addEventListener('scroll',()=>{if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
-let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{layout();onScroll()},120)});
-addEventListener('keydown',e=>{if(!pinned||active<0||e.target.closest('input,textarea'))return;if(e.key==='ArrowDown'||e.key==='PageDown'){if(active<N-1){e.preventDefault();goTo(active+1)}}if(e.key==='ArrowUp'||e.key==='PageUp'){if(active>0){e.preventDefault();goTo(active-1)}}});
+/* ================= terrain maths ================= */
+const hsh=(x,y)=>{const h=Math.sin(x*127.1+y*311.7)*43758.5453;return h-Math.floor(h)};
+const vn=(x,y)=>{const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);return lerp(lerp(hsh(xi,yi),hsh(xi+1,yi),u),lerp(hsh(xi,yi+1),hsh(xi+1,yi+1),u),v)};
+const fbm=(x,y)=>{let s=0,a=.5,f=1;for(let o=0;o<5;o++){s+=a*vn(x*f,y*f);f*=2.03;a*=.5}return s};
+const FEAT=[[5,-6,4.4,1.7],[13,-14,6.2,2.3],[-5,4,1.8,2.6],[9,-10,2.3,2.1],[1,-1,-1.2,3.2],[-14.5,13.5,-3,3],[-8,-6,2.6,2.8],[8,4,2.2,3.2],[-2,-11,3,3]];
+const WL=-1.25;
+function H(x,z){let h=(fbm(x*.085+3.1,z*.085-7.3)-.5)*5.4+(fbm(x*.25+11,z*.25+2)-.5)*.8;for(const[fx,fz,fh,fr]of FEAT)h+=fh*Math.exp(-((x-fx)**2+(z-fz)**2)/(fr*fr));return h}
+const known=(x,z,e)=>{const s=(x-z)*.7071+Math.sin(x*1.7)*.35+Math.sin(z*2.3)*.3;return smooth(clamp((e+1.1-s)/2.2,0,1))};
+const PAST=[[-11.5,10.4],[-9.2,8.6],[-7,6.6],[-5,4],[-2.6,2],[1,-1],[2.9,-3.1],[5,-6]];
+const FUT=[[5,-6],[6.8,-7.9],[9,-10],[11,-11.9],[13,-14]];
 
-/* ---------- autoplay once ---------- */
-const played=new Set();
-function autoplay(id){if(played.has(id))return;played.add(id);const f={ck:()=>runCk(),os:()=>$('#osRun').click(),rp:()=>$('#rpRun').click(),ns:()=>$('#nsRun').click(),mh:()=>$('#mhRun').click(),jt:()=>$('#jtApply').click()}[id];if(f)setTimeout(f,650)}
+/* ================= colour + camera state ================= */
+const ST={pal:PAL.start.map(hex),from:null,to:null,pt0:0,edge:8.4,route:0};
+const tws=[];
+function tween(obj,key,to,ms,ease=easeIO){if(reduce||!ms){obj[key]=to;return}for(let i=tws.length-1;i>=0;i--)if(tws[i].o===obj&&tws[i].k===key)tws.splice(i,1);tws.push({o:obj,k:key,from:obj[key],to,t0:performance.now(),ms,ease})}
+function setPal(name){const to=PAL[name].map(hex);ST.from=ST.pal.map(c=>c.slice());ST.to=to;ST.pt0=performance.now();ST.palName=name}
+function applyPal(){const r=document.documentElement.style,n=['--bg','--fg','--surf','--acc'];ST.pal.forEach((c,i)=>r.setProperty(n[i],`rgb(${c.map(v=>Math.round(v*255)).join(',')})`));$('#themeColor').content=`rgb(${ST.pal[0].map(v=>Math.round(v*255)).join(',')})`}
+applyPal();
+
+/* ================= MAP ================= */
+const MAP=(()=>{
+  const api={go(){},fit(){},retrieve(){},clear(){},flash(){},ok:false};
+  const cv=$('#map');let R=null;
+  try{if(window.THREE){R=new THREE.WebGLRenderer({canvas:cv,antialias:true});if(!R.getContext())R=null}}catch(e){R=null}
+  if(!R){document.documentElement.classList.add('no-gl');return api}
+  const small=innerWidth<700,PR=Math.min(devicePixelRatio||1,small?1.6:2);R.setPixelRatio(PR);
+  const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(42,1,.1,200);
+  const S=small?150:230,SZ=38,geo=new THREE.PlaneGeometry(SZ,SZ,S,S);geo.rotateX(-Math.PI/2);
+  const pos=geo.attributes.position,aH=new Float32Array(pos.count);
+  for(let i=0;i<pos.count;i++){const x=pos.getX(i),z=pos.getZ(i),h=H(x,z);aH[i]=h;pos.setY(i,Math.max(h,WL))}
+  geo.setAttribute('aH',new THREE.BufferAttribute(aH,1));geo.computeVertexNormals();
+  const KN=`float known(vec2 p,float e){float s=(p.x-p.y)*.7071+sin(p.x*1.7)*.35+sin(p.y*2.3)*.3;return smoothstep(0.,1.,clamp((e+1.1-s)/2.2,0.,1.));}`;
+  const U={uEdge:{value:ST.edge},uCam:{value:new THREE.Vector3()},uBg:{value:new THREE.Color()},uFg:{value:new THREE.Color()},uSurf:{value:new THREE.Color()},uAcc:{value:new THREE.Color()}};
+  const TM=new THREE.ShaderMaterial({uniforms:U,extensions:{derivatives:true},
+    vertexShader:`attribute float aH;uniform float uEdge;varying float vH,vK;varying vec3 vW,vN;${KN}
+void main(){vec3 p=position;float k=known(p.xz,uEdge);vK=k;p.y=mix(-.35,p.y,k);vH=mix(-.35,aH,k);vN=normal;vW=p;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,
+    fragmentShader:`uniform vec3 uBg,uFg,uSurf,uAcc,uCam;varying float vH,vK;varying vec3 vW,vN;
+void main(){
+  float t=clamp((vH+1.2)/7.5,0.,1.);
+  float sh=clamp(dot(normalize(vN),normalize(vec3(-.55,.78,.32)))*.65+.42,0.,1.);
+  vec3 lit=mix(uBg,uSurf,.42),dark=uBg*.76;
+  vec3 c=mix(dark,lit,mix(.5,sh,vK)*(.62+.38*t));
+  c=mix(c,mix(uBg,uAcc,.3),smoothstep(.35,1.,t)*.35*vK);
+  float water=(1.-step(${WL.toFixed(3)}+.02,vH))*step(.5,vK);
+  c=mix(c,mix(uBg,uAcc,.38)*(.96+.04*sin(vW.z*30.+vW.x*3.)),water);
+  float fw=max(fwidth(vH),1e-4);
+  float k=.3,f=fract(vH/k),d=min(f,1.-f)*k,lm=1.-smoothstep(0.,fw*1.05,d);
+  float f5=fract(vH/(k*5.)),d5=min(f5,1.-f5)*k*5.,lM=1.-smoothstep(0.,fw*1.8,d5);
+  c=mix(c,uFg,max(lm*.24,lM*.55)*(1.-water)*vK);
+  vec2 g=fract(vW.xz/1.6)-.5;float dg=1.-smoothstep(.035,.06,length(g));
+  c=mix(mix(uBg,uFg,dg*.22),c,vK);
+  float em=max(abs(vW.x),abs(vW.z));c=mix(uBg,c,smoothstep(18.6,16.2,em));
+  c=mix(c,uBg,smoothstep(18.,48.,length(vW-uCam))*.9);
+  gl_FragColor=vec4(c,1.);}`});
+  scene.add(new THREE.Mesh(geo,TM));
+  const yAt=(x,z,lift=0)=>lerp(-.35,Math.max(H(x,z),WL),known(x,z,ST.edge))+lift;
+  const dense=(arr,n)=>{const c=new THREE.CatmullRomCurve3(arr.map(([x,z])=>new THREE.Vector3(x,0,z)),false,'centripetal');return c.getSpacedPoints(n).map(v=>{v.y=Math.max(H(v.x,v.z),WL)+.07;return v})};
+  const tube=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(dense(PAST,500)),700,.045,6,false),tubeMat=new THREE.MeshBasicMaterial({color:'#c8442a'});
+  scene.add(new THREE.Mesh(tube,tubeMat));const tubeTotal=tube.index.count;tube.setDrawRange(0,0);
+  const fut=dense(FUT,140),fp=new Float32Array(fut.length*3);fut.forEach((v,i)=>fp.set([v.x,Math.max(H(v.x,v.z),WL),v.z],i*3));
+  const FG=new THREE.BufferGeometry();FG.setAttribute('position',new THREE.BufferAttribute(fp,3));
+  const FM=new THREE.ShaderMaterial({uniforms:{uEdge:U.uEdge,uPR:{value:PR},uFg:U.uFg},transparent:true,depthWrite:false,
+    vertexShader:`uniform float uEdge,uPR;${KN}void main(){vec3 p=position;float k=known(p.xz,uEdge);p.y=mix(-.35,p.y,k)+.08;vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;gl_PointSize=uPR*mix(3.,4.,k)*(14./-mv.z);}`,
+    fragmentShader:`uniform vec3 uFg;void main(){vec2 c=gl_PointCoord-.5;if(length(c)>.5)discard;gl_FragColor=vec4(uFg,.7);}`});
+  scene.add(new THREE.Points(FG,FM));
+  /* retrieval arcs */
+  let arcs=[];const arcMat=new THREE.MeshBasicMaterial({color:'#2f6fb0'});const Q=new THREE.Vector3();
+  api.retrieve=(ids)=>{api.clear();if(!ids.length)return;
+    const pts=ids.map(id=>{const p=PLACES[id];return new THREE.Vector3(p.x,yAt(p.x,p.z,.25),p.z)});
+    const c=pts.reduce((a,b)=>a.add(b),new THREE.Vector3()).multiplyScalar(1/pts.length);Q.set(c.x,Math.max(...pts.map(p=>p.y))+3.2,c.z);
+    pts.forEach((p,i)=>{const mid=Q.clone().lerp(p,.5);mid.y+=1.2;const g=new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(Q.clone(),mid,p),60,.03,5,false);g.setDrawRange(0,0);const m=new THREE.Mesh(g,arcMat);scene.add(m);const a={m,g,total:g.index.count,v:0};arcs.push(a);setTimeout(()=>tween(a,'v',1,900),i*120)});
+    $('#qmark').classList.add('on')};
+  api.clear=()=>{arcs.forEach(a=>{scene.remove(a.m);a.g.dispose()});arcs=[];$('#qmark').classList.remove('on')};
+  /* camera */
+  const C={p:new THREE.Vector3(...CH[0].cam[0]),t:new THREE.Vector3(...CH[0].cam[1])},CT={pf:C.p.clone(),tf:C.t.clone(),pt:C.p.clone(),tt:C.t.clone(),k:1};
+  api.go=(p,t,ms=1800)=>{CT.pf.copy(C.p);CT.tf.copy(C.t);CT.pt.set(...p);CT.tt.set(...t);CT.k=0;tween(CT,'k',1,ms)};
+  api.fit=(ids,ms=1800)=>{const pts=ids.map(id=>new THREE.Vector3(PLACES[id].x,yAt(PLACES[id].x,PLACES[id].z),PLACES[id].z));
+    const c=pts.reduce((a,b)=>a.add(b),new THREE.Vector3()).multiplyScalar(1/pts.length);let r=0;pts.forEach(p=>r=Math.max(r,p.distanceTo(c)));
+    const d=Math.max(10,r*3+8),dir=new THREE.Vector3(.5,.72,.55).normalize();api.go(c.clone().addScaledVector(dir,d).toArray(),[c.x,c.y+.6,c.z],ms)};
+  api.close=(id,ms=1600)=>{const p=PLACES[id],y=yAt(p.x,p.z),dir=new THREE.Vector3(.55,.62,.58).normalize();api.go(new THREE.Vector3(p.x,y,p.z).addScaledVector(dir,6.8).toArray(),[p.x,y+.4,p.z],ms)};
+  /* view offset so the map sits in the gap between the panels */
+  const OFF={x:0,y:0};
+  api.offset=()=>{const w=innerWidth;if(mobile()){OFF.x=0;OFF.y=innerHeight*.29;return}const lp=$('#lp').getBoundingClientRect(),rpEl=$('#rp'),rpOn=!rpEl.classList.contains('off');const l=lp.right,r=rpOn?w-rpEl.getBoundingClientRect().left:0;tween(OFF,'x',(l-r)/2,700);OFF.y=0};
+  function size(){const w=cv.clientWidth,h=cv.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.fov=w<h?58:40;api.offset()}
+  addEventListener('resize',size);size();
+  /* pins */
+  const pinsEl=$('#pins'),PINS={};
+  Object.entries(PLACES).forEach(([id,p])=>{const el=document.createElement('div');el.className='pin '+p.cls;if(p.proj)el.style.setProperty('--c',SRC[p.proj==='ckd'?'ckd':p.proj].c);
+    el.innerHTML=`<span class="stem"></span><span class="foot"></span><button type="button" aria-label="${p.label}">${p.cls==='camp'?'<i class="dot"></i>':''}<span>${p.small?`<small>${p.small}</small>`:''}<b>${p.label}</b></span><span class="badges"></span></button>`;
+    pinsEl.appendChild(el);el.querySelector('button').onclick=()=>{if(p.proj)openProject(p.proj);else if(p.ch!=null)goCh(p.ch)};PINS[id]={el,p,badges:el.querySelector('.badges')}});
+  let hasBadges=false;
+  api.badges=(map)=>{hasBadges=Object.keys(map).length>0;Object.entries(PINS).forEach(([id,o])=>{const b=map[id]||[];o.badges.innerHTML=b.map(n=>`<em>${n}</em>`).join('');o.el.classList.toggle('cited',b.length>0);o.el.classList.toggle('dim',!!Object.keys(map).length&&!b.length)})};
+  api.flash=id=>{const o=PINS[id];if(!o)return;o.el.classList.remove('flash');void o.el.offsetWidth;o.el.classList.add('flash')};
+  let mx=0,my=0;addEventListener('pointermove',e=>{mx=e.clientX/innerWidth*2-1;my=e.clientY/innerHeight*2-1},{passive:true});
+  const V=new THREE.Vector3(),tmpP=new THREE.Vector3(),tmpT=new THREE.Vector3();let last=performance.now();
+  function frame(n){const dt=Math.min(.05,(n-last)/1000);last=n;
+    for(let i=tws.length-1;i>=0;i--){const t=tws[i],p=clamp((n-t.t0)/t.ms,0,1);t.o[t.k]=lerp(t.from,t.to,t.ease(p));if(p>=1)tws.splice(i,1)}
+    if(ST.to){const p=clamp((n-ST.pt0)/900,0,1),e=easeIO(p);ST.pal=ST.from.map((c,i)=>c.map((v,j)=>lerp(v,ST.to[i][j],e)));applyPal();if(p>=1)ST.to=null}
+    const [bg,fg,sf,ac]=ST.pal;U.uBg.value.setRGB(...bg);U.uFg.value.setRGB(...fg);U.uSurf.value.setRGB(...sf);U.uAcc.value.setRGB(...ac);R.setClearColor(U.uBg.value,1);tubeMat.color.setRGB(...ac);arcMat.color.setRGB(...ac);
+    U.uEdge.value=ST.edge;tube.setDrawRange(0,Math.floor(tubeTotal*clamp(ST.route,0,1)/3)*3);
+    arcs.forEach(a=>a.g.setDrawRange(0,Math.floor(a.total*a.v/3)*3));
+    const k=easeIO(CT.k);C.p.lerpVectors(CT.pf,CT.pt,k);C.t.lerpVectors(CT.tf,CT.tt,k);
+    cam.position.copy(C.p);if(!reduce){cam.position.x+=mx*.45;cam.position.y+=-my*.25}cam.lookAt(C.t);U.uCam.value.copy(cam.position);
+    const w=cv.clientWidth,h=cv.clientHeight;cam.setViewOffset(w,h,-OFF.x,OFF.y,w,h);cam.updateProjectionMatrix();
+    R.render(scene,cam);
+    Object.values(PINS).forEach(({el,p})=>{const kk=known(p.x,p.z,ST.edge);V.set(p.x,yAt(p.x,p.z),p.z).project(cam);
+      const vis=V.z<1&&Math.abs(V.x)<1.1&&Math.abs(V.y)<1.1&&kk>.6&&!(mode==='walk'&&chI===0&&!hasBadges);
+      el.style.opacity=vis?'':0;el.style.pointerEvents='none';el.querySelector('button').style.pointerEvents=vis?'auto':'none';
+      if(vis)el.style.transform=`translate(${((V.x+1)/2*w).toFixed(1)}px,${((1-V.y)/2*h).toFixed(1)}px)`});
+    if(arcs.length){V.copy(Q).project(cam);$('#qmark').style.transform=`translate(${((V.x+1)/2*w).toFixed(1)}px,${((1-V.y)/2*h).toFixed(1)}px)`}
+    requestAnimationFrame(frame)}
+  requestAnimationFrame(frame);
+  api.ok=true;return api})();
+
+/* ================= modes, chapters ================= */
+let mode='walk',chI=0;
+const lp=$('#lp'),rp=$('#rp'),rpBody=$('#rpBody');
+$('#ticks').innerHTML=CH.map((c,i)=>`<button data-i="${i}" aria-label="${c.r}" title="${c.r}"></button>`).join('');
+function renderCh(){const c=CH[chI],b=$('#chBody');b.innerHTML=c.html;b.classList.remove('fade-in');void b.offsetWidth;b.classList.add('fade-in');b.scrollTop=0;
+  $$('#ticks button').forEach((t,i)=>{t.classList.toggle('on',i===chI);t.classList.toggle('done',i<chI)});$('#prev').disabled=chI===0;$('#next').textContent=chI===CH.length-1?'Ask the map →':'Next →';
+  const cp=$('#copy');if(cp)cp.onclick=()=>copyMail(cp)}
+function goCh(i){i=clamp(i,0,CH.length-1);if(mode!=='walk')setMode('walk',true);closeRP(true);chI=i;const c=CH[i];setPal(c.pal);MAP.badges({});tween(ST,'edge',c.edge,1600);tween(ST,'route',c.route,1600);MAP.go(...c.cam);renderCh();syncURL()}
+$('#prev').onclick=()=>goCh(chI-1);
+$('#next').onclick=()=>chI===CH.length-1?setMode('ask'):goCh(chI+1);
+$('#ticks').addEventListener('click',e=>{const b=e.target.closest('button');if(b)goCh(+b.dataset.i)});
+function setMode(m,quiet){mode=m;$$('.modes [data-mode]').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  $('#walk').hidden=m!=='walk';$('#walk').style.display=m==='walk'?'contents':'none';$('#ask').hidden=m!=='ask';
+  if(m==='ask'){setPal('start');tween(ST,'edge',24,1400);tween(ST,'route',1,1400);if(lastRun){MAP.retrieve(lastRun.places);MAP.fit(lastRun.places.length?lastRun.places:['bham']);MAP.badges(lastRun.badges);showReceipts()}else{MAP.go([6,20,15],[2,0,-4]);demo()}}
+  else{resetAsk();if(!quiet)goCh(chI)}
+  requestAnimationFrame(()=>MAP.offset&&MAP.offset());syncURL()}
+$$('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)goCh(+g.dataset.go);const pj=e.target.closest('[data-proj]');if(pj)openProject(pj.dataset.proj);
+  const l=e.target.closest('[data-lb]');if(l){$('#lbImg').src=l.dataset.lb;$('#lbCap').textContent=l.dataset.cap||"Boffin's Den, March 2026";$('#lb').showModal()}});
+$('#lb').addEventListener('click',()=>$('#lb').close());
+$('#home').onclick=e=>{e.preventDefault();goCh(0)};
+/* walk by wheel, swipe or keys, without scrolling the page */
+let wheelLock=0,acc=0;
+addEventListener('wheel',e=>{if(e.target.closest('.panel')||mode!=='walk'||$('dialog[open]'))return;e.preventDefault();acc+=e.deltaY;const n=performance.now();if(n<wheelLock)return;if(Math.abs(acc)>40){goCh(chI+(acc>0?1:-1));acc=0;wheelLock=n+1100}},{passive:false});
+let ty0=null;addEventListener('touchstart',e=>{if(!e.target.closest('.panel'))ty0=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{if(ty0==null||mode!=='walk')return;const dy=ty0-e.changedTouches[0].clientY;ty0=null;if(Math.abs(dy)>45)goCh(chI+(dy>0?1:-1))},{passive:true});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dialog[open]')&&!rp.classList.contains('off')){$('#rpX').onclick();return}
+  if(e.target.closest('input,textarea,select,.rp')||mode!=='walk'||$('dialog[open]'))return;if(['ArrowDown','ArrowRight','PageDown'].includes(e.key)){e.preventDefault();goCh(chI+1)}if(['ArrowUp','ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();goCh(chI-1)}});
+
+/* ================= right panel: receipts, project, record ================= */
+let rpView=null,rpStack=[],curToy=null;
+const FLOAT=new URLSearchParams(location.search).get('receipts')!=='panel';
+function openRP(view,title,html,push=true){if(push&&rpView&&rpView!==view)rpStack.push(rpView);rpView=view;rp.classList.toggle('float',FLOAT&&view==='receipts');returnToy();$('#rpTitle').textContent=title;rpBody.innerHTML=html;rpBody.scrollTop=0;rpBody.classList.remove('fade-in');void rpBody.offsetWidth;rpBody.classList.add('fade-in');rp.classList.remove('off');$('#rpBack').hidden=!rpStack.length;setTimeout(()=>MAP.offset&&MAP.offset(),20)}
+function closeRP(quiet){if(rp.classList.contains('off'))return;returnToy();rp.classList.add('off');rpView=null;rpStack=[];setTimeout(()=>MAP.offset&&MAP.offset(),20);if(!quiet)restoreContext();syncURL()}
+function restoreContext(){if(mode==='walk'){const c=CH[chI];setPal(c.pal);tween(ST,'edge',c.edge,1200);MAP.badges({});MAP.go(...c.cam)}else{setPal('start');MAP.badges(lastRun?lastRun.badges:{});if(lastRun&&lastRun.places.length)MAP.fit(lastRun.places);else MAP.go([6,20,15],[2,0,-4])}}
+/* × steps back to wherever you came from (the record, the receipts) before it closes the panel */
+$('#rpX').onclick=()=>rpStack.length?$('#rpBack').onclick():closeRP();
+$('#rpBack').onclick=()=>{const v=rpStack.pop();if(v==='receipts')showReceipts(false);else if(v==='record')showRecord(false);else closeRP()};
+function returnToy(){if(curToy){$('#toyStore').appendChild(curToy);curToy=null}}
+const played=new Set(),AUTO={ns:'#nsRun',ck:'#ckRun',os:'#osRun',rp:'#rpRun',mh:'#mhRun',jt:'#jtApply'};
+let curProj=null;
+function openProject(k){const p=PROJ[k];if(!p)return;curProj=k;
+  openRP('project',p.kind,`<div class="pj"><p class="kind">${p.kind}</p><h3>${p.t}</h3>${p.sub?`<p class="sub">${p.sub}</p>`:''}${p.acro?`<p class="acro">${p.acro}</p>`:''}<div class="numrow">${p.num[0]?`<span class="num-pre">${p.num[0]}</span>`:''}<span class="num">${p.num[1]}</span><span class="numlbl">${p.num[2]}</span></div><p class="lead">${p.lead}</p><ul class="facts">${p.facts.map(f=>`<li><span>${f}</span></li>`).join('')}</ul>${p.acts?`<div class="pj-acts">${p.acts}</div>`:''}<div class="pj-demo"><span class="mono">Press it: a working demo</span><div id="demoSlot"></div></div></div>`);
+  const toy=document.getElementById(p.toy);if(toy){$('#demoSlot').appendChild(toy);curToy=toy;if(!played.has(p.toy)&&AUTO[p.toy]){played.add(p.toy);setTimeout(()=>{const b=$(AUTO[p.toy]);if(b&&curToy===toy)b.click()},700)}}
+  setPal(k);MAP.close(p.place);syncURL()}
+/* coming back to the receipts also brings back the Ask colours, camera and numbered flags */
+function showReceipts(push=true){if(!lastRun)return;openRP('receipts',`Receipts · ${lastRun.cited.length}`,lastRun.html,push);bindReceipts();
+  setPal('start');MAP.badges(lastRun.badges);if(lastRun.places.length)MAP.fit(lastRun.places);syncURL()}
+function bindReceipts(){$$('#rpBody .rcpt').forEach(c=>{c.classList.add('on');const v=c.querySelector('.vf');if(lastRun.ok){v.textContent='✓ matches the record';v.classList.add('ok')}})}
+/* the record remembers which sources are open and how far you'd scrolled */
+const REC={open:new Set(),top:0};
+const recPids=()=>PIDS.filter(p=>REC.open.has(P[p][0]));
+function recFocus(){const ps=recPids();if(!ps.length){restoreContext();return}
+  const b={};ps.forEach(p=>{const id=PLACE_OF(p);b[id]=[(b[id]?b[id][0]:0)+1]});const pl=Object.keys(b);
+  if(pl.some(id=>known(PLACES[id].x,PLACES[id].z,ST.edge)<.6))tween(ST,'edge',24,1400);
+  MAP.badges(b);MAP.fit(pl,1400);pl.forEach((id,i)=>setTimeout(()=>MAP.flash(id),500+i*120))}
+function showRecord(push=true){
+  openRP('record','The record',`<div class="rec-head"><h3>The record.</h3><p>${PIDS.length} passages from ${SIDS.length} sources. Every answer can only quote from here. Open a source to see where it sits on the map.</p></div><div style="margin-top:12px;border-top:1px solid var(--hair)">${SIDS.map(s=>{const ps=PIDS.filter(p=>P[p][0]===s),S=SRC[s],o=REC.open.has(s);return `<div class="srow${o?' open':''}" data-s="${s}" style="--c:${S.c}"><button class="srow-h" aria-expanded="${o}"><i></i><span class="nm"><b>${S.n}</b><small>${S.k}</small></span><em>${ps.length}</em><span class="chev" aria-hidden="true"></span></button><div class="srow-b"><div><ol>${ps.map((p,j)=>`<li style="--i:${j}"><code>${p} · ${PLACES[PLACE_OF(p)].label}</code>${esc(P[p][1])}</li>`).join('')}${SRC_PROJ[s]?`<li style="--i:${ps.length}"><button class="btn ghost" style="padding:7px 12px;font-size:.85rem" data-proj="${SRC_PROJ[s]}">Open ${PROJ[SRC_PROJ[s]].t} →</button></li>`:''}</ol></div></div></div>`}).join('')}</div>`,push);
+  rpBody.classList.remove('fade-in');requestAnimationFrame(()=>{rpBody.scrollTop=REC.top});
+  $$('#rpBody .srow-h').forEach(h=>h.onclick=()=>{const row=h.parentElement,s=row.dataset.s,o=!row.classList.contains('open');
+    row.classList.toggle('open',o);h.setAttribute('aria-expanded',o);o?REC.open.add(s):REC.open.delete(s);recFocus();
+    if(o)setTimeout(()=>row.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'}),420)});
+  if(REC.open.size){setPal(mode==='walk'?CH[chI].pal:'start');recFocus()}else restoreContext();syncURL()}
+rpBody.addEventListener('scroll',()=>{if(rpView==='record')REC.top=rpBody.scrollTop},{passive:true});
+$('[data-panel="record"]').onclick=()=>showRecord();
+
+/* ================= asking ================= */
+$('#qchips').innerHTML=QS.map(q=>`<button type="button" data-q="${q.id}">${q.q}</button>`).join('');
+const qin=$('#qin'),qform=$('#qform');
+function nudge(on){qform.classList.toggle('nudge',on)}
+$$('#qchips button').forEach(b=>b.onclick=()=>{touched=true;qin.value=b.textContent;$$('#qchips button').forEach(x=>x.classList.toggle('on',x===b));$('#ask').scrollTo({top:0,behavior:reduce?'auto':'smooth'});qin.focus({preventScroll:true});nudge(true)});
+qin.addEventListener('input',()=>{touched=true;$$('#qchips button').forEach(x=>x.classList.remove('on'));nudge(qin.value.trim().length>3)});
+qform.addEventListener('submit',e=>{e.preventDefault();touched=true;nudge(false);const t=qin.value.trim();if(!t)return;const chip=QS.find(q=>q.q===t);if(chip)run(chip.id,t);else route(t)});
+/* longer, more specific keywords win: "what job does he want" goes to goals, not shipping */
+/* keywords match from the start of a word ("ship" is not in "sponsorship"); a trailing space means whole word only */
+const kwRe=k=>new RegExp('\\b'+k.trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+(k.endsWith(' ')?'\\b':''));
+function route(t){const s=' '+t.toLowerCase().replace(/[^a-z0-9 ]/g,' ')+' ';let best=null,bs=0,hits=[];[...QS,...QHIDDEN].forEach(q=>{const h=q.kw.filter(k=>kwRe(k).test(s)),sc=h.reduce((a,k)=>a+k.trim().length,0);if(sc>bs){bs=sc;best=q;hits=h}});run(best?best.id:null,t,best?hits:null)}
+let token=0,touched=false,lastRun=null,demoed=false;
+const pipe=$$('#pipe li');
+function setStep(i,st,txt){const li=pipe[i];li.classList.remove('act','done');if(st)li.classList.add(st);if(txt!=null)li.querySelector('em').textContent=txt}
+async function run(qid,asked,hits){const my=++token,alive=()=>my===token,W=ms=>sleep(reduce?0:ms);
+  const q=qid?QX[qid]:{d:'escalate',m:[.04,.1,.2],a:'Nothing in the record covers that, and this page won\'t guess. It goes to a person: ask Sriraj directly.'};
+  $('#ans').hidden=false;$('#ask').classList.add('asked');$('#ask').scrollTop=0;
+  const mq=$('#moreQ');if(mq.hidden){mq.appendChild($('#qchips'));mq.hidden=false}$('#aq').textContent=asked;$('#am').textContent=hits?`Matched on: ${hits.map(h=>`"${h.trim()}"`).join(', ')}`:(qid?'':'No match in the record');
+  pipe.forEach((_,i)=>setStep(i,null,''));const vd=$('#verdict');vd.className='verdict';$$('#met b').forEach(b=>b.style.transform='scaleX(0)');$('#atext').innerHTML='';$('#clar').innerHTML='';
+  const cited=[];q.a.replace(/\{(\w+)\}/g,(_,p)=>{if(!cited.includes(p))cited.push(p)});const num=p=>cited.indexOf(p)+1;
+  const places=[...new Set(cited.map(PLACE_OF))],badges={};cited.forEach(p=>{const pl=PLACE_OF(p);(badges[pl]=badges[pl]||[]).push(num(p))});
+  const html=cited.length?cited.map(p=>{const s=SRC[P[p][0]],ph=P[p][2],pj=SRC_PROJ[P[p][0]];return `<article class="rcpt" id="rc-${p}" style="--c:${s.c}"><header><span class="n">${num(p)}</span><span class="src">${s.n}</span><span class="vf">checking…</span></header><blockquote>${esc(P[p][1])}</blockquote>${ph?`<div class="ph">${ph.map(src=>`<button data-lb="${src}" aria-label="Open photo"><img src="${src}" alt="" loading="lazy"></button>`).join('')}</div>`:''}<footer class="mono"><span>${PLACES[PLACE_OF(p)].label} · ${p}</span>${pj?`<button data-proj="${pj}">Open project →</button>`:''}</footer></article>`}).join(''):`<p class="empty">No passages to show. The record has nothing on this, so the question goes to a person.</p><div class="ctas"><button class="btn" id="escMail2">Copy his email</button><a class="btn ghost" href="https://www.linkedin.com/in/srirajparuchuru" target="_blank" rel="noopener">LinkedIn</a></div>`;
+  lastRun={qid,cited,places,badges,html,ok:false};setPal('start');syncURL();
+  /* retrieve */
+  setStep(0,'act','searching the map');MAP.badges({});MAP.retrieve(places);if(places.length)MAP.fit(places);else MAP.go([6,20,15],[2,0,-4]);
+  await W(1200);if(!alive())return;
+  const srcN=new Set(cited.map(p=>P[p][0])).size;setStep(0,'done',cited.length?`${cited.length} passages · ${places.length} place${places.length>1?'s':''}`:'nothing found');
+  MAP.badges(badges);
+  /* check */
+  setStep(1,'act','matching quotes');openRP('receipts',`Receipts · ${cited.length}`,html,false);rpStack=[];$('#rpBack').hidden=true;
+  const e2=$('#escMail2');if(e2)e2.onclick=()=>copyMail(e2);
+  let ok=0;
+  for(const p of cited){await W(200);if(!alive())return;const c=$('#rc-'+p);if(c)c.classList.add('on')}
+  /* the check runs against the record itself, so opening another panel mid-run can't skew the count */
+  for(const p of cited){await W(230);if(!alive())return;const match=PIDS.includes(p)&&q.a.includes('{'+p+'}');if(match)ok++;
+    const v=$('#rc-'+p+' .vf');if(v){v.textContent=match?'✓ matches the record':'✗ not in the record';v.classList.toggle('ok',match)}MAP.flash(PLACE_OF(p))}
+  lastRun.ok=ok===cited.length;setStep(1,'done',cited.length?`${ok} of ${cited.length} quotes match`:'nothing to check');
+  /* decide */
+  setStep(2,'act','weighing signals');$$('#met b').forEach((b,i)=>setTimeout(()=>b.style.transform=`scaleX(${q.m[i]})`,i*130));
+  await W(850);if(!alive())return;
+  const D={answer:'Answer',clarify:'Ask back',escalate:'Hand to a person'};vd.textContent=D[q.d];vd.classList.add('on',q.d);setStep(2,'done',D[q.d]);
+  /* answer */
+  setStep(3,'act','writing');
+  $('#atext').innerHTML=q.a.split(/(\{\w+\})/).map(part=>{const m=part.match(/^\{(\w+)\}$/);if(m){const p=m[1];return `<button class="cite w" data-p="${p}" style="--c:${SRC[P[p][0]].c}" aria-label="Receipt ${num(p)}">${num(p)}</button>`}return part.split(/(\s+)/).map(t=>/^\s+$/.test(t)||!t?t:`<span class="w">${esc(t)}</span>`).join('')}).join('');
+  $$('#atext .cite').forEach(b=>{b.onclick=()=>{if(rpView!=='receipts')showReceipts();const c=$('#rc-'+b.dataset.p);if(c){c.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});c.classList.add('hl');setTimeout(()=>c.classList.remove('hl'),1400)}};
+    b.onmouseenter=()=>{MAP.flash(PLACE_OF(b.dataset.p));const c=$('#rc-'+b.dataset.p);c&&c.classList.add('hl')};b.onmouseleave=()=>{const c=$('#rc-'+b.dataset.p);c&&c.classList.remove('hl')}});
+  for(const w of $$('#atext .w')){if(!alive())return;w.classList.add('on');if(!reduce)await sleep(20)}
+  setStep(3,'done',q.d==='answer'?'with receipts':q.d==='clarify'?'one question back':'no receipts, no answer');
+  if(q.d==='clarify')$('#clar').innerHTML=q.clar.map(([t,id])=>`<button data-to="${id}">${t}</button>`).join('');
+  if(q.d==='escalate')$('#clar').innerHTML=`<button id="escMail">Copy his email</button><a class="ghost" href="https://www.linkedin.com/in/srirajparuchuru" target="_blank" rel="noopener">LinkedIn</a><button class="ghost" data-go="6">What he's looking for</button>`;
+  $$('#clar [data-to]').forEach(b=>b.onclick=()=>{const t=QX[b.dataset.to];qin.value=t.q;nudge(true);qin.focus()});
+  const em=$('#escMail');if(em)em.onclick=()=>copyMail(em);
+  if(mobile())$('#ans').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'})}
+
+/* leaving Ask wipes it: the answers never change, so there's nothing to keep */
+function resetAsk(){token++;lastRun=null;$('#ans').hidden=true;$('#ask').classList.remove('asked');
+  const mq=$('#moreQ');if(!mq.hidden){qform.after($('#qchips'));mq.hidden=true}
+  $$('#qchips button').forEach(x=>x.classList.remove('on'));qin.value='';nudge(false);$('#clar').innerHTML='';$('#atext').innerHTML='';
+  MAP.clear();MAP.badges({});if(rpView==='receipts')closeRP(true)}
+
+/* the demo types a question, then waits for the visitor to press Ask */
+async function demo(){if(demoed||touched)return;demoed=true;await sleep(900);const q=QX.check;qin.value='';
+  for(const ch of q.q){if(touched||mode!=='ask')return;qin.value+=ch;if(!reduce)await sleep(30)}
+  if(!touched&&mode==='ask'){$$('#qchips button').forEach(x=>x.classList.toggle('on',x.dataset.q==='check'));nudge(true)}}
+qin.addEventListener('pointerdown',()=>{touched=true});
+
+async function copyMail(btn){const lbl=btn.querySelector('span')||btn,old=lbl.textContent;try{await navigator.clipboard.writeText('sriraj.paruchuru@gmail.com');lbl.textContent='Copied'}catch(_){location.href='mailto:sriraj.paruchuru@gmail.com'}setTimeout(()=>lbl.textContent=old,1500)}
 
 /* ================= toys ================= */
 /* CrackD */
@@ -1120,95 +1156,32 @@ $('#jtLog').onclick=()=>{const j=JOBS[jI],d=new Date(),row=document.createElemen
   const rows=$('#jtRows');rows.appendChild(row);while(rows.children.length>3)rows.firstElementChild.remove();
   $('#jtToast').classList.remove('on');jI=(jI+1)%JOBS.length;setTimeout(showJob,450)};
 
-/* ================= where I'm headed ================= */
-const PHCAP={'1':'Boffin’s Den, March 2026. I kept the pitch short. When it came to explaining the architecture, I handed the judges the live CrackD site and let them try it themselves, the only finalist to do so. CrackD won Champion and Most Valuable Product.','0':'Sriraj Paruchuru · Birmingham, UK'};
-$$('#hdSeg button').forEach(b=>b.onclick=()=>{const k=b.dataset.i;if(b.classList.contains('on'))return;
-  $$('#hdSeg button').forEach(x=>x.classList.toggle('on',x===b));$$('.hd-panel').forEach(p=>p.classList.toggle('on',p.dataset.i===k));
-  $$('.portrait .ph').forEach(im=>im.classList.toggle('on',im.dataset.i===k));
-  const c=$('#phCap');c.classList.add('out');setTimeout(()=>{c.textContent=PHCAP[k];c.classList.remove('out');c.classList.add('pre');void c.offsetWidth;c.classList.remove('pre')},260)});
 
-/* ================= photos ================= */
-const GAL={boffins:[
-  {src:'assets/boffins-stage.jpg',cap:'Demoing CrackD at Boffin\'s Den, University of Birmingham, March 2026'},
-  {src:'assets/boffins-group.jpg',cap:'Finalists and judges at Boffin\'s Den, March 2026'},
-  {src:'assets/boffins-certificate.webp',cap:'Champion and Most Valuable Product certificate, judged by Google Cloud, Builder\'s Club, GDG, Recapa and teaching staff'}]};
-let gal=null,gi=0;const lb=$('#lb');
-function showLb(){const g=GAL[gal][gi];$('#lbImg').src=g.src;$('#lbImg').alt=g.cap;$('#lbCap').textContent=g.cap+'  ·  '+(gi+1)+' / '+GAL[gal].length}
-function openLb(k,i){gal=k;gi=i;showLb();if(!lb.open)lb.showModal()}
-$('#lbPrev').onclick=()=>{gi=(gi-1+GAL[gal].length)%GAL[gal].length;showLb()};
-$('#lbNext').onclick=()=>{gi=(gi+1)%GAL[gal].length;showLb()};
-$('#lbX').onclick=()=>lb.close();
-lb.addEventListener('click',e=>{if(e.target===lb)lb.close()});
-lb.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')$('#lbPrev').click();if(e.key==='ArrowRight')$('#lbNext').click()});
-document.addEventListener('click',e=>{const b=e.target.closest('[data-gal]');if(b)openLb(b.dataset.gal,+b.dataset.i||0)});
 
-/* ================= path ================= */
-const Y0=2019.4,Y1=2026.95,X=y=>(y-Y0)/(Y1-Y0)*100;
-const G=[
- {k:'vit',s:2019.5,e:2023.7,l:'B.Tech, VIT-AP',t:'B.Tech in Computer Science and Engineering',w:'Vellore Institute of Technology, Andhra Pradesh · Jul 2019 to Sep 2023',b:['Four years of computer science foundations: algorithms, databases, networks and software engineering.','Where I first shipped deep learning work, later extended into MedHealth.']},
- {k:'nor',s:2024.25,e:2025.7,l:'Software Developer, Norstella',t:'Software Developer, Norstella',w:'Strategic Intelligence and Enterprise Value platform teams · Apr 2024 to Sep 2025',b:['Delivered React, TypeScript and Node.js features across two pharmaceutical analytics platforms, from requirements through testing, on 3-4 day release cycles.','Optimised backend routing and server-side filtering for queries over millions of rows. Filtered responses went from roughly 300-500 ms to 20-30 ms.','Built Excel export, AWS Lambda and S3 delivery with validation; implemented Auth0 SSO, JWT and role-based access.','Helped design and build internal AI tools alongside senior colleagues.']},
- {k:'pg',s:2025.93,ev:1,l:'4th, Google AI Playground',t:'Google AI Playground Hackathon, 4th place',w:'Google, London · December 2025',b:['Built a multimodal Gemini app with team BrumMind at Google\'s London office.']},
- {k:'msc',s:2025.7,e:2026.72,l:'MSc AI and ML, Birmingham',t:'MSc Artificial Intelligence and Machine Learning',w:'University of Birmingham · Sep 2025 to Sep 2026',b:['Dissertation: One Size Might Not Fit All, a benchmark of six low-cost models inside one fixed RAG system.','PwC x University of Birmingham workshop on LangChain, LangGraph and LangSmith, February 2026.']},
- {k:'hk',s:2026.2,ev:1,l:'Boffin\'s Den champion',gal:'boffins',t:'Google Cloud Agentic AI Hackathon',w:'University of Birmingham · March 2026',b:['Champion and Most Valuable Product at Boffin\'s Den, the Dragons\' Den-style final, for CrackD.','Judged on innovation, technical execution and presentation by Google Cloud, Builder\'s Club, Google Developer Groups, Recapa and teaching staff.','5th in the qualifier with a multi-agent CRM on Google ADK, Vertex AI, BigQuery and RAG.']},
- {k:'act',s:2026.26,e:2026.55,l:'Student Activator',t:'Student Activator, University of Birmingham',w:'Active Residences programme · Apr 2026 to Jul 2026',b:['Ran weekly sport and fitness sessions for 15+ students at a time, many of them trying a sport for the first time.','Picked up Social Sport sessions beyond the programme with the Sport and Fitness teams.']}];
-$('#gAxis').innerHTML=[2020,2021,2022,2023,2024,2025,2026].map(y=>`<span style="left:${X(y)}%">${innerWidth<600?"'"+String(y).slice(2):y}</span>`).join('');
-$('#gantt').insertAdjacentHTML('beforeend',G.map(g=>{const r=X(g.s)>50;return `<button class="lane-g${g.ev?' ev':''}" data-k="${g.k}"><span class="bar-g" style="left:${X(g.s)}%;width:${g.ev?0:X(g.e)-X(g.s)}%"></span><span class="lab${r?' r':''}" style="left:${r?(g.ev?X(g.s)-1.2:X(g.e)):X(g.s)}%">${g.l}${g.gal?'<i></i>':''}</span></button>`}).join(''));
-const gd=$('#gDetail');
-function pickG(k,anim){const g=G.find(x=>x.k===k);$$('.lane-g').forEach(l=>l.classList.toggle('on',l.dataset.k===k));
-  const set=()=>{gd.innerHTML=`<div><h3>${g.t}</h3><p class="when">${g.w}</p></div><ul>${g.b.map(x=>`<li>${x}</li>`).join('')}</ul><div class="thumbs">${g.gal?GAL[g.gal].map((p,i)=>`<button data-gal="${g.gal}" data-i="${i}" aria-label="Open photo: ${p.cap}"><img src="${p.src}" alt="" loading="lazy"${p.src.endsWith('.webp')?' style="object-fit:contain;background:#fff"':''}></button>`).join(''):''}</div>`;gd.classList.remove('swap')};
-  if(!anim||reduce)return set();gd.classList.add('swap');setTimeout(set,220)}
-$$('.lane-g').forEach(l=>l.onclick=()=>pickG(l.dataset.k,true));
-pickG('hk');
-
-/* time-of-day greeting */
-const GREET=[[0,4,"It's really late. Time to get some sleep, your health comes first."],[4,6,"Either you haven't slept yet, or you've just woken up. Either way, hello."],[6,8,"Early start. Coffee first, then have a look around."],[8,12,"Good morning. Grab breakfast and have a great day!"],[12,14,"Good afternoon. Hope lunch was a good one."],[14,17,"Good afternoon. Halfway through the day, keep going."],[17,21,"Good evening. Thanks for spending some of it here."],[21,24,"It's getting late. Have a look, then get some rest."]];
-const tfmt=tz=>new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',hour12:false,...(tz?{timeZone:tz}:{})});
-function greet(){const now=new Date(),h=now.getHours();$('#greetTxt').textContent=GREET.find(([a,b])=>h>=a&&h<b)[2];
-  $('#greetTimes').innerHTML=`Your time <b>${tfmt().format(now)}</b> · Mine in Birmingham <b>${tfmt('Europe/London').format(now)}</b>`}
-greet();setInterval(greet,20000);
-
-/* resume dialog */
-const rd=$('#rdlg');
-$('#resBtn').onclick=()=>rd.showModal();
-$('#rdX').onclick=()=>rd.close();
-rd.addEventListener('click',e=>{if(e.target===rd)rd.close()});
-
-/* copy */
-$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText('sriraj.paruchuru@gmail.com');$('#copyLbl').textContent='Copied'}catch(_){location.href='mailto:sriraj.paruchuru@gmail.com'}setTimeout(()=>$('#copyLbl').textContent='Copy',1500)};
-
-/* ================= why sequence ================= */
-const sp=$('#scrubP'), why=$('#why'), frs=$$('.fr'), wpips=$$('.why-pips i'), whyMk=$('#whyMk');
-(()=>{let html='';sp.textContent.split(/(\[|\])/).forEach(part=>{if(part==='['){html+='<span class="mk">';return}if(part===']'){html+='</span>';return}
-  html+=part.split(/(\s+)/).map(w=>/^\s+$/.test(w)||!w?w:`<span class="w">${w}</span>`).join('')});sp.innerHTML=html})();
-const spW=$$('#scrubP .w'), spM=$$('#scrubP .mk'), SEG=[0,.36,.52,.68,.84];
-if(reduce)why.classList.add('flat');
-let wf=-2;
-function scrubUpdate(){
-  const r=why.getBoundingClientRect(),vh=innerHeight,run=r.height-vh;
-  if(reduce){spW.forEach(w=>w.classList.add('lit'));spM.forEach(m=>m.classList.add('on'));whyMk.classList.add('on');return}
-  const p=clamp(-r.top/run,0,1);
-  const L=clamp((vh*.9-r.top)/(vh*.9+run*.28),0,1), n=Math.floor(L*spW.length*1.04);
-  spW.forEach((w,i)=>w.classList.toggle('lit',i<n));
-  spM.forEach(m=>{const l=m.querySelector('.w:last-child');m.classList.toggle('on',!!l&&l.classList.contains('lit'))});
-  let f=0;SEG.forEach((v,i)=>{if(p>=v)f=i});
-  if(f!==wf){wf=f;frs.forEach((el,i)=>{el.classList.toggle('on',i===f);el.classList.toggle('past',i<f)});wpips.forEach((el,i)=>el.classList.toggle('on',i===f));whyMk.classList.toggle('on',f===4)}
-}
-
-/* ================= experience entrance ================= */
-const nsC=$('#nsDots');let nsSeen=false;
-function nsStatic(){if(nsSeen)drawStatic(nsC,'norstella')}
-function nsEnter(){if(nsSeen)return;nsSeen=true;const num=$('#nsNum');
-  if(!reduce){const t0=performance.now();const f=n=>{const t=clamp((n-t0)/1300,0,1),v=Math.round(lerp(500,25,easeOut(t)));num.textContent=v+' ms';if(t<1)requestAnimationFrame(f);else num.textContent='20-30 ms'};requestAnimationFrame(f)}
-  const T=shape('norstella',nsC._w,nsC._h),S=T.map((d,i)=>({x:Math.random()*nsC._w,y:Math.random()*nsC._h}));const t0=performance.now();
-  const g=n=>{const list=T.map((d,i)=>{const t=reduce?1:easeIO(clamp((n-t0-(i%45)*9)/900,0,1));return {x:lerp(S[i].x,d.x,t),y:lerp(S[i].y,d.y,t),r:d.r,c:d.c,a:d.a*t}});drawOn(nsC,list);if(list.some((d,i)=>n-t0-(i%45)*9<900))requestAnimationFrame(g)};requestAnimationFrame(g);
-  autoplay('ns')}
-new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)nsEnter()}),{threshold:.35}).observe(expEl);
-addEventListener('resize',()=>setTimeout(nsStatic,200));
+/* ================= URL routing: back/forward and shareable links =================
+   #ch=3            a chapter of the walk (no hash = the start)
+   #ask, #ask=ml    Ask, optionally with a question already answered
+   &p=ckd           a project open on top
+   &record          the record open on top                                  */
+let applying=false,syncQ=false,syncRep=false,booted=false;
+function routeOf(){let r=mode==='walk'?(chI?`ch=${chI}`:''):(lastRun&&lastRun.qid?`ask=${lastRun.qid}`:'ask');
+  const pan=rpView==='project'&&curProj?`p=${curProj}`:rpView==='record'?'record':'';if(pan)r=r?`${r}&${pan}`:pan;return r?'#'+r:''}
+function syncURL(){if(!booted)return;syncRep=syncRep||applying;if(syncQ)return;syncQ=true;
+  queueMicrotask(()=>{syncQ=false;const r=routeOf(),rep=syncRep;syncRep=false;if(r===location.hash)return;history[rep?'replaceState':'pushState'](null,'',r||location.pathname+location.search)})}
+function applyRoute(h){const parts={};h.replace(/^#/,'').split('&').filter(Boolean).forEach(s=>{const[k,v]=s.split('=');parts[k]=v??''});
+  applying=true;
+  try{
+    if('ask' in parts){if(mode!=='ask')setMode('ask');const q=parts.ask;if(q&&QX[q]&&(!lastRun||lastRun.qid!==q)){demoed=touched=true;qin.value=QX[q].q;run(q,QX[q].q)}}
+    else{const i=clamp(parseInt(parts.ch)||0,0,CH.length-1);if(mode!=='walk'||i!==chI)goCh(i)}
+    if(parts.p&&PROJ[parts.p]){if(!(rpView==='project'&&curProj===parts.p)){if(rpStack[rpStack.length-1]==='project')rpStack.pop();openProject(parts.p)}}
+    else if('record' in parts){if(rpView!=='record'){if(rpStack[rpStack.length-1]==='record'){rpStack.pop();showRecord(false)}else showRecord()}}
+    else if(rpView==='project'||rpView==='record'){if(rpStack.length)$('#rpBack').onclick();else if(mode==='ask'&&lastRun)showReceipts(false);else closeRP()}
+  }finally{applying=false}}
+addEventListener('popstate',()=>applyRoute(location.hash));
 
 /* go */
-layout();onScroll();
-document.fonts&&document.fonts.ready.then(()=>{layout();onScroll()});
-addEventListener('load',()=>{layout();onScroll()});
+renderCh();setPal('start');MAP.go(...CH[0].cam,10);
+booted=true;applyRoute(location.hash);
 })();
 </script>
 </body>
