@@ -267,10 +267,74 @@ p{margin:0}
 .qmark b{position:absolute;left:-6px;top:-6px;width:12px;height:12px;border-radius:50%;background:var(--fg)}
 @keyframes qp{from{transform:scale(.6);opacity:1}to{transform:scale(1.9);opacity:0}}
 
-dialog.lb{border:0;padding:0;background:transparent;max-width:min(1100px,94vw);overflow:visible}
-dialog.lb::backdrop{background:rgba(10,10,12,.82);backdrop-filter:blur(6px)}
-.lb img{max-width:min(1100px,94vw);max-height:82vh;border-radius:14px;object-fit:contain;background:#111}
-.lb p{color:#eee;margin-top:10px;font-size:.9rem}
+/* photo prints, pinned to the map beside their flag */
+#prints{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;visibility:hidden;transition:opacity .45s,visibility 0s .45s}
+#prints.on{opacity:1;visibility:visible;transition:opacity .45s}
+#prints .cl{position:absolute;left:0;top:0;width:432px;height:460px;transform-origin:0 0;will-change:transform}
+#prints .plead{position:absolute;left:0;top:0;height:1px;background:var(--fg);opacity:.45;transform-origin:0 50%;will-change:transform,width}
+#prints .plead::after{content:"";position:absolute;left:-3px;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--fg)}
+.print{position:absolute;width:232px;padding:8px 8px 30px;border:0;border-radius:6px;background:var(--surf);color:var(--fg);cursor:zoom-in;pointer-events:auto;transform:rotate(var(--r));box-shadow:0 26px 50px -22px rgba(0,0,0,.55),0 0 0 1px var(--hair);transition:transform .5s var(--ease),box-shadow .4s,background .3s}
+.print img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;background:var(--tint)}
+.print.cert img{object-position:50% 45%;background:#fff}
+.print .pc{position:absolute;left:12px;right:12px;bottom:9px;display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:.62rem;color:var(--mut);white-space:nowrap}
+.print .pc b{color:var(--fg);font-weight:600}
+.print .tape{position:absolute;top:-9px;left:50%;width:58px;height:18px;margin-left:-29px;background:color-mix(in srgb,var(--acc) 32%,transparent);border-radius:2px;transform:rotate(-3deg)}
+.print:hover,.print:focus-visible{transform:rotate(0deg) translateY(-8px) scale(1.03);z-index:3;box-shadow:0 34px 60px -24px rgba(0,0,0,.6),0 0 0 1px var(--hair)}
+#prints.on .print{animation:deal .75s var(--ease) backwards;animation-delay:calc(var(--i) * 110ms)}
+@keyframes deal{from{opacity:0;transform:translate(36px,-26px) rotate(calc(var(--r) + 9deg)) scale(.92)}}
+#prints .pcount{position:absolute;left:96px;top:424px;pointer-events:auto;border:0;border-radius:99px;padding:8px 13px;background:var(--fg);color:var(--surf);font-family:var(--mono);font-size:.68rem;cursor:pointer;white-space:nowrap;transition:transform .3s var(--ease)}
+#prints .pcount:hover{transform:translateY(-2px)}
+@media(min-width:901px){html:not(.no-gl) #chBody .photo[data-prints]{display:none}}
+@media(max-width:900px){#prints{display:none}}
+
+/* photo gallery */
+dialog.gal{width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:transparent;color:#fff;overflow:hidden}
+dialog.gal::backdrop{background:rgba(8,11,15,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+/* opening: the backdrop fades in while the photo flies out of whatever was pressed, then the captions and controls rise in */
+dialog.gal[open]::backdrop{animation:galbd .45s ease}
+dialog.gal.closing::backdrop{animation:galbdout .42s ease forwards}
+@keyframes galbd{from{opacity:0}}
+@keyframes galbdout{to{opacity:0}}
+dialog.gal.enter .gal-in>header,dialog.gal.enter .gal-in>footer,dialog.gal.enter .gal-arr{animation:galui .5s var(--ease) .2s backwards}
+dialog.gal.enter .gal-in>footer{animation-delay:.26s}
+@keyframes galui{from{opacity:0;transform:translateY(10px)}}
+dialog.gal.closing .gal-in>header,dialog.gal.closing .gal-in>footer,dialog.gal.closing .gal-arr{opacity:0;transition:opacity .18s}
+.gal-stage img.fly{transition:none;will-change:transform,clip-path}
+.gal-in{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:20px 28px 22px;gap:14px}
+.gal-in header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.gal-in header p{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
+.gal-in header b{font-size:1.08rem;font-weight:650;letter-spacing:-.02em}
+.gal-in header span{font-family:var(--mono);font-size:.7rem;color:#9aa4ad}
+.gal-r{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:.7rem;color:#9aa4ad;white-space:nowrap}
+.gal-in button{font:inherit;color:#fff;cursor:pointer}
+.gal-x,.gal-arr{border:0;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;transition:background .25s}
+.gal-x{width:38px;height:38px;font-size:1rem}
+.gal-arr{width:48px;height:48px;font-size:1.15rem;flex:none}
+.gal-x:hover,.gal-arr:hover{background:rgba(255,255,255,.2)}
+.gal-arr:disabled{opacity:.25;cursor:default}
+.gal-stage{display:flex;align-items:center;justify-content:center;gap:22px;min-height:0}
+.gal-stage figure{margin:0;height:100%;flex:1;min-width:0;display:flex;align-items:center;justify-content:center}
+.gal-stage img{max-width:100%;max-height:100%;border-radius:14px;object-fit:contain;transition:opacity .3s}
+.gal-stage img.sw{opacity:0}
+.gal-in footer{display:flex;justify-content:space-between;align-items:flex-end;gap:24px}
+.gal-cap{max-width:560px;font-size:.96rem;line-height:1.45;color:#d6dde3}
+.gal-cap span{display:block;font-family:var(--mono);font-size:.68rem;color:#8d979f;margin-bottom:4px}
+.gal-th{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none;max-width:60%}
+.gal-th button{flex:none;width:92px;height:62px;padding:0;border:0;border-radius:9px;overflow:hidden;opacity:.45;background:#222;transition:opacity .25s,box-shadow .25s}
+.gal-th button:hover{opacity:.8}
+.gal-th button.on{opacity:1;box-shadow:0 0 0 2px #fff}
+.gal-th img{width:100%;height:100%;object-fit:cover}
+.gal-th .cert img{background:#fff}
+@media(max-width:900px){
+  .gal-in{padding:12px 12px 16px;gap:10px}
+  .gal-in header span{display:none}
+  .gal-stage{position:relative;gap:0}
+  .gal-arr{position:absolute;z-index:2;top:50%;margin-top:-22px;width:44px;height:44px;background:rgba(0,0,0,.45)}
+  .gal-arr.p{left:6px}.gal-arr.n{right:6px}
+  .gal-in footer{flex-direction:column;align-items:stretch;gap:12px}
+  .gal-th{max-width:none}
+  .gal-th button{width:72px;height:50px}
+}
 
 /* phones and narrow windows: map on top, panels as sheets */
 @media(max-width:900px){
@@ -630,7 +694,12 @@ dialog.lb::backdrop{background:rgba(10,10,12,.82);backdrop-filter:blur(6px)}
           <div class="dp-foot"><div class="dp-score"><small>Changed-line mutation score</small><span id="dpScore">?</span></div><button class="run" id="dpRun">Run mutants <i>→</i></button></div>
         </div>
 </div>
-<dialog class="lb" id="lb" aria-label="Photo"><img id="lbImg" alt=""><p id="lbCap"></p></dialog>
+<div id="prints" aria-label="Photos from this stop"><span class="plead"></span><div class="cl"></div></div>
+<dialog class="gal" id="gal" aria-label="Photos"><div class="gal-in">
+  <header><p><b id="galT"></b><span id="galS"></span></p><div class="gal-r"><span id="galN"></span><button class="gal-x" id="galX" type="button" aria-label="Close photos">✕</button></div></header>
+  <div class="gal-stage"><button class="gal-arr p" id="galP" type="button" aria-label="Previous photo">←</button><figure><img id="galImg" alt=""></figure><button class="gal-arr n" id="galNx" type="button" aria-label="Next photo">→</button></div>
+  <footer><p class="gal-cap" id="galCap"></p><div class="gal-th" id="galTh"></div></footer>
+</div></dialog>
 
 <script>
 (()=>{
@@ -772,7 +841,7 @@ const CH=[
  {r:'VIT-AP',pal:'med',edge:8.4,route:.12,cam:[[-8.6,5.2,16.2],[-11,-.6,10]],html:`<p class="kick mono"><span>Trailhead · 2019 to 2023</span><span>01</span></p><h2>Where the trail starts.</h2><p class="txt"><b>B.Tech in Computer Science and Engineering</b> at Vellore Institute of Technology, AP. Four years of foundations, and the first deep learning work I shipped, later extended into MedHealth.</p><div class="stats"><div><b>94.1%</b><span>M-Net with Dice loss, on 3,064 MRI slices</span></div><div><b>98 → 33 MB</b><span>with TensorFlow Lite, so it runs on a phone</span></div></div><div class="camps"><button data-proj="med"><i></i>Open MedHealth</button></div>`},
  {r:'Norstella',pal:'nor',edge:8.4,route:.42,cam:[[-1.8,7.4,12.4],[-4.6,.6,3.6]],html:`<p class="kick mono"><span>The climb · Apr 2024 to Sep 2025</span><span>02</span></p><h2>Eighteen months of production.</h2><p class="txt">Software Developer at <b>Norstella</b>, on two pharmaceutical analytics platforms in React, TypeScript and Node.js, taking work from requirements through testing.</p><div class="stats"><div><b>20-30 ms</b><span>filtered responses, down from roughly 300-500 ms over millions of rows</span></div><div><b>3-4 days</b><span>between releases, with Playwright, Docker and Azure DevOps</span></div></div><p class="quote">It taught me to think in processes: where the data comes from, where it can break, and who is relying on it when it does.</p><div class="camps"><button data-proj="nor"><i></i>Open Norstella</button></div>`},
  {r:'Birmingham',pal:'dis',edge:8.4,route:.76,cam:[[4.8,8.4,6],[.8,-.6,-1.2]],html:`<p class="kick mono"><span>The valley · from Sep 2025</span><span>03</span></p><h2>A valley full of experiments.</h2><p class="txt"><b>MSc in AI and Machine Learning</b> at the University of Birmingham, Sep 2025 to Sep 2026. Most of what I build now has a language model inside it, so most of it also has a way of checking it. Press a flag, or one of these.</p><div class="camps">${['dis','fpl','rep','dpf','trk','ret'].map(k=>`<button data-proj="${k}" style="--c:${SRC[k].c}"><i></i>${PROJ[k].t}</button>`).join('')}</div>`},
- {r:'Boffin\'s Den',pal:'ckd',edge:8.4,route:1,cam:[[9.6,6.4,2.4],[4.6,2.6,-6]],html:`<p class="kick mono"><span>Highest point so far · March 2026</span><span>04</span></p><h2>CrackD, at Boffin's Den.</h2><p class="txt">Interview prep that reads a CV the way a recruiter and an ATS would. It won <b>Champion and Most Valuable Product</b> at the Google Cloud Agentic AI Hackathon final. I kept the pitch short, then handed the judges the live site instead of walking them through the architecture, the only finalist to do so.</p><button class="photo" data-lb="assets/boffins-stage.jpg" data-cap="Demoing CrackD at Boffin's Den, March 2026"><img src="assets/boffins-stage.jpg" alt="Sriraj at the lectern, demoing CrackD" loading="lazy"></button><div class="stats"><div><b>25+</b><span>testers, and over 60% want to keep using it</span></div><div><b>61</b><span>issues from their feedback, planned into a multi-sprint roadmap</span></div></div><div class="camps"><button data-proj="ckd"><i></i>Open CrackD</button></div>`},
+ {r:'Boffin\'s Den',pal:'ckd',photos:'peak',edge:8.4,route:1,cam:[[9.6,6.4,2.4],[4.6,2.6,-6]],html:`<p class="kick mono"><span>Highest point so far · March 2026</span><span>04</span></p><h2>CrackD, at Boffin's Den.</h2><p class="txt">Interview prep that reads a CV the way a recruiter and an ATS would. It won <b>Champion and Most Valuable Product</b> at the Google Cloud Agentic AI Hackathon final. I kept the pitch short, then handed the judges the live site instead of walking them through the architecture, the only finalist to do so.</p><button class="photo" data-prints data-lb="assets/boffins-stage.jpg"><img src="assets/boffins-stage.jpg" alt="Sriraj at the lectern, demoing CrackD" loading="lazy"></button><div class="stats"><div><b>25+</b><span>testers, and over 60% want to keep using it</span></div><div><b>61</b><span>issues from their feedback, planned into a multi-sprint roadmap</span></div></div><div class="camps"><button data-proj="ckd"><i></i>Open CrackD</button></div>`},
  {r:'The edge',pal:'rep',edge:8.4,route:1,cam:[[8.2,7.4,1.6],[9,1,-9.5]],html:`<p class="kick mono"><span>Now</span><span>05</span></p><h2>Here, the map runs out.</h2><p class="txt">Everything past this point is blank paper. I could walk it alone, but I'd learn faster beside someone who has already been there.</p>`},
  {r:'Next',pal:'dpf',edge:15.8,route:1,cam:[[13,6.6,-1.6],[9,1.4,-10]],html:`<p class="kick mono"><span>Step one · next</span><span>06</span></p><h2>Build, with a mentor.</h2><p class="txt">An <b>applied AI, software or forward deployed engineering</b> role on an AI-native team, where someone more experienced can show me how it's done well. Watch the map fill in.</p><div class="tags"><span>I keep up with the latest in AI</span><span>I test what the model returns</span><span>I prototype fast</span></div>`},
  {r:'Product',pal:'ret',edge:24,route:1,cam:[[18.4,8,-3.4],[12.6,3.6,-13.6]],html:`<p class="kick mono"><span>Step two · after that</span><span>07</span></p><h2>Then, product.</h2><p class="txt">An associate or junior product role, <b>starting a step below</b>. The long-term goal is AI product management: working out what's worth building, with the people who build it.</p><div class="tags"><span>I genuinely like meetings</span><span>I love team brainstorms</span><span>Calm across many workloads</span></div><div class="stats"><div><b>61</b><span>CrackD issues from tester feedback, planned into sprints</span></div><div><b>15+</b><span>students at weekly sport sessions I ran as a Student Activator</span></div></div>`},
@@ -870,6 +939,7 @@ void main(){
     pinsEl.appendChild(el);el.querySelector('button').onclick=()=>{if(p.proj)openProject(p.proj);else if(p.ch!=null)goCh(p.ch)};PINS[id]={el,p,badges:el.querySelector('.badges')}});
   let hasBadges=false;
   api.badges=(map)=>{hasBadges=Object.keys(map).length>0;Object.entries(PINS).forEach(([id,o])=>{const b=map[id]||[];o.badges.innerHTML=b.map(n=>`<em>${n}</em>`).join('');o.el.classList.toggle('cited',b.length>0);o.el.classList.toggle('dim',!!Object.keys(map).length&&!b.length)})};
+  api.pin=id=>PINS[id];
   api.flash=id=>{const o=PINS[id];if(!o)return;o.el.classList.remove('flash');void o.el.offsetWidth;o.el.classList.add('flash')};
   let mx=0,my=0;addEventListener('pointermove',e=>{mx=e.clientX/innerWidth*2-1;my=e.clientY/innerHeight*2-1},{passive:true});
   const V=new THREE.Vector3(),tmpP=new THREE.Vector3(),tmpT=new THREE.Vector3();let last=performance.now();
@@ -883,10 +953,12 @@ void main(){
     cam.position.copy(C.p);if(!reduce){cam.position.x+=mx*.45;cam.position.y+=-my*.25}cam.lookAt(C.t);U.uCam.value.copy(cam.position);
     const w=cv.clientWidth,h=cv.clientHeight;cam.setViewOffset(w,h,-OFF.x,OFF.y,w,h);cam.updateProjectionMatrix();
     R.render(scene,cam);
-    Object.values(PINS).forEach(({el,p})=>{const kk=known(p.x,p.z,ST.edge);V.set(p.x,yAt(p.x,p.z),p.z).project(cam);
+    Object.values(PINS).forEach(o=>{const {el,p}=o,kk=known(p.x,p.z,ST.edge);V.set(p.x,yAt(p.x,p.z),p.z).project(cam);
       const vis=V.z<1&&Math.abs(V.x)<1.1&&Math.abs(V.y)<1.1&&kk>.6&&!(mode==='walk'&&chI===0&&!hasBadges);
       el.style.opacity=vis?'':0;el.style.pointerEvents='none';el.querySelector('button').style.pointerEvents=vis?'auto':'none';
-      if(vis)el.style.transform=`translate(${((V.x+1)/2*w).toFixed(1)}px,${((1-V.y)/2*h).toFixed(1)}px)`});
+      o.vis=vis;o.sx=(V.x+1)/2*w;o.sy=(1-V.y)/2*h;
+      if(vis)el.style.transform=`translate(${o.sx.toFixed(1)}px,${o.sy.toFixed(1)}px)`});
+    api.onFrame&&api.onFrame(n);
     if(arcs.length){V.copy(Q).project(cam);$('#qmark').style.transform=`translate(${((V.x+1)/2*w).toFixed(1)}px,${((1-V.y)/2*h).toFixed(1)}px)`}
     requestAnimationFrame(frame)}
   requestAnimationFrame(frame);
@@ -910,13 +982,94 @@ function setMode(m,quiet){mode=m;$$('.modes [data-mode]').forEach(b=>b.classList
   requestAnimationFrame(()=>MAP.offset&&MAP.offset());syncURL()}
 $$('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)goCh(+g.dataset.go);const pj=e.target.closest('[data-proj]');if(pj)openProject(pj.dataset.proj);
-  const l=e.target.closest('[data-lb]');if(l){$('#lbImg').src=l.dataset.lb;$('#lbCap').textContent=l.dataset.cap||"Boffin's Den, March 2026";$('#lb').showModal()}});
-$('#lb').addEventListener('click',()=>$('#lb').close());
+  const l=e.target.closest('[data-lb]');if(l)GAL.openSrc(l.dataset.lb,l)});
+
+/* ================= photos: prints on the map, and a gallery ================= */
+/* each set belongs to a place on the map; a chapter with photos:'<place>' deals its prints beside that flag.
+   To add Student Activator photos: add a 'bham' set here and photos:'bham' to the Birmingham chapter. */
+const PHOTOS={
+ peak:{t:'Boffin\'s Den',s:'Google Cloud Agentic AI Hackathon · March 2026',d:'Mar 2026',items:[
+  {src:'assets/boffins-stage.jpg',k:'On stage',cap:'Demoing CrackD at the final',line:'I kept the pitch short, then handed the judges the live CrackD site instead of walking them through the architecture.',alt:'Sriraj at the lectern, demoing CrackD'},
+  {src:'assets/boffins-group.jpg',k:'The final',cap:'At the University of Birmingham',line:'Boffin\'s Den, the final of the Google Cloud Agentic AI Hackathon.',alt:'Sriraj with the group in front of the Boffin\'s Den screen'},
+  {src:'assets/boffins-certificate.webp',k:'Champion · MVP',cap:'The certificate',line:'Champion and Most Valuable Product, awarded to CrackD by the judges.',alt:'Certificate: Champion and Most Valuable Product, CrackD by Sriraj Paruchuru',cls:'cert'}]}};
+const GAL=(()=>{
+  const dlg=$('#gal'),img=$('#galImg');let set=null,i=0,from=null,origin=null,closing=false,flight=null;
+  /* where a photo sits on the page: its unrotated size, centre, tilt and corner radius */
+  function spot(el){if(!el||!el.isConnected)return null;const b=el.getBoundingClientRect();if(b.width<4||b.bottom<0||b.top>innerHeight||b.right<0||b.left>innerWidth)return null;
+    const tilt=el.closest('.print'),m=tilt?getComputedStyle(tilt).transform:'none';let th=0;
+    if(m&&m!=='none'){const v=m.match(/matrix\(([^)]+)\)/);if(v){const [a,bb]=v[1].split(',').map(parseFloat);th=Math.atan2(bb,a)}}
+    const c=Math.abs(Math.cos(th)),s=Math.abs(Math.sin(th)),d=c*c-s*s;
+    const w=d>.2?(b.width*c-b.height*s)/d:b.width,h=d>.2?(b.height*c-b.width*s)/d:b.height;
+    return {cx:b.left+b.width/2,cy:b.top+b.height/2,w,h,th,r:parseFloat(getComputedStyle(el).borderRadius)||parseFloat(getComputedStyle(el.parentElement).borderRadius)||6}}
+  /* the photo in the gallery, posed to sit exactly over that spot (cropped to its shape) */
+  function pose(S){const F=img.getBoundingClientRect(),k=Math.max(S.w/F.width,S.h/F.height),ix=Math.max(0,(F.width-S.w/k)/2),iy=Math.max(0,(F.height-S.h/k)/2);
+    return {transform:`translate(${S.cx-(F.left+F.width/2)}px,${S.cy-(F.top+F.height/2)}px) rotate(${S.th}rad) scale(${k})`,clipPath:`inset(${iy}px ${ix}px round ${S.r/k}px)`}}
+  const REST={transform:'none',clipPath:'inset(0px 0px round 14px)'};
+  /* the matching photo on the page for the one now showing: the one pressed, else any visible copy */
+  function target(){const src=set.items[i].src;if(origin&&origin.getAttribute('src')===src&&spot(origin))return origin;
+    return [...document.querySelectorAll('img')].find(x=>!dlg.contains(x)&&x.getAttribute('src')===src&&spot(x))||null}
+  function hide(el,on){if(el)el.style.visibility=on?'hidden':''}
+  async function fly(){const S=spot(origin);img.classList.add('fly');img.style.opacity=0;
+    try{await img.decode()}catch(e){}
+    if(!dlg.open||closing)return;img.style.opacity='';dlg.classList.add('enter');
+    if(S){hide(origin,true);flight=img.animate([pose(S),REST],{duration:560,easing:'cubic-bezier(.2,.8,.2,1)'})}
+    else flight=img.animate([{opacity:0,transform:'translateY(14px) scale(.95)'},{opacity:1,transform:'none'}],{duration:420,easing:'cubic-bezier(.2,.8,.2,1)'});
+    flight.onfinish=()=>{img.classList.remove('fly');flight=null}}
+  function shut(){if(!dlg.open||closing)return;if(reduce){dlg.close();return}closing=true;flight&&flight.cancel();
+    const el=target();if(el!==origin)hide(origin,false);const S=spot(el);dlg.classList.remove('enter');dlg.classList.add('closing');img.classList.add('fly');
+    const a=S?(hide(el,true),img.animate([REST,pose(S)],{duration:440,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'}))
+             :img.animate([{opacity:1},{opacity:0,transform:'translateY(10px) scale(.96)'}],{duration:300,easing:'ease',fill:'forwards'});
+    a.onfinish=()=>{dlg.close();a.cancel();hide(el,false);hide(origin,false);dlg.classList.remove('closing');img.classList.remove('fly');closing=false}}
+  function show(n,first){i=(n+set.items.length)%set.items.length;const it=set.items[i];
+    const put=()=>{img.src=it.src;img.alt=it.alt||'';img.classList.remove('sw')};
+    if(first||reduce)put();else{img.classList.add('sw');setTimeout(put,140)}
+    $('#galN').textContent=set.items.length>1?`${i+1} / ${set.items.length}`:'';
+    $('#galCap').innerHTML=`<span>${it.k} · ${it.cap}</span>${it.line}`;
+    $$('#galTh button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-current',j===i)});
+    const on=$('#galTh .on');on&&on.scrollIntoView({block:'nearest',inline:'nearest'});
+    set.items.forEach((x,j)=>{if(Math.abs(j-i)===1){const p=new Image();p.src=x.src}})}
+  function open(key,n=0,el){set=typeof key==='string'?PHOTOS[key]:key;if(!set||closing)return;from=document.activeElement;origin=el&&el.tagName==='IMG'?el:(el&&el.querySelector('img'))||null;
+    $('#galT').textContent=set.t;$('#galS').textContent=set.s||'';
+    $('#galTh').innerHTML=set.items.length>1?set.items.map((x,j)=>`<button type="button" class="${x.cls||''}" data-i="${j}" aria-label="Photo ${j+1}: ${x.k}"><img src="${x.src}" alt="" loading="lazy"></button>`).join(''):'';
+    $('#galP').hidden=$('#galNx').hidden=set.items.length<2;
+    show(n,true);if(dlg.open)return;dlg.showModal();$('#galX').focus({preventScroll:true});if(!reduce)fly()}
+  function openSrc(src,el){for(const [k,s] of Object.entries(PHOTOS)){const n=s.items.findIndex(x=>x.src===src);if(n>=0)return open(k,n,el)}
+    open({t:'Photo',items:[{src,k:'Photo',cap:'',line:'',alt:''}]},0,el)}
+  $('#galX').onclick=shut;$('#galP').onclick=()=>show(i-1);$('#galNx').onclick=()=>show(i+1);
+  $('#galTh').addEventListener('click',e=>{const b=e.target.closest('button');if(b)show(+b.dataset.i)});
+  dlg.addEventListener('cancel',e=>{e.preventDefault();shut()});
+  dlg.addEventListener('click',e=>{if(e.target===dlg||e.target.classList.contains('gal-stage')||e.target.tagName==='FIGURE')shut()});
+  dlg.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){e.preventDefault();show(i-1)}if(e.key==='ArrowRight'){e.preventDefault();show(i+1)}});
+  dlg.addEventListener('close',()=>{img.removeAttribute('src');if(from&&from.focus)from.focus({preventScroll:true})});
+  let sx=null;dlg.addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+  dlg.addEventListener('touchend',e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;if(Math.abs(dx)>45)show(i+(dx<0?1:-1))},{passive:true});
+  return {open,openSrc}})();
+/* the prints: dealt beside the chapter's flag, following it as the camera moves */
+(()=>{if(!MAP.pin)return;
+  const root=$('#prints'),cl=root.querySelector('.cl'),lead=root.querySelector('.plead');
+  const SLOT=[[0,0,-5],[200,34,4],[86,196,-2]],CW=432,CH_=460;let cur=null,showAt=0,lpR=0;
+  const measure=()=>{lpR=lp.getBoundingClientRect().right};addEventListener('resize',measure);measure();
+  function build(key){const s=PHOTOS[key];cur=key;
+    cl.innerHTML=s.items.slice(0,3).map((x,j)=>`<button type="button" class="print ${x.cls||''}" data-i="${j}" style="left:${SLOT[j][0]}px;top:${SLOT[j][1]}px;--r:${SLOT[j][2]}deg;--i:${j}" aria-label="Open photo: ${x.k}"><span class="tape"></span><img src="${x.src}" alt="${x.alt||''}" loading="lazy"><span class="pc"><b>${x.k}</b><span>${s.d||''}</span></span></button>`).join('')+
+      `<button type="button" class="pcount">${s.items.length} photo${s.items.length>1?'s':''} · open the gallery</button>`}
+  cl.addEventListener('click',e=>{const p=e.target.closest('.print');if(p)GAL.open(cur,+p.dataset.i,p);else if(e.target.closest('.pcount'))GAL.open(cur,0,cl.querySelector('.print'))});
+  let was=null;
+  MAP.onFrame=n=>{const key=mode==='walk'&&rp.classList.contains('off')&&!mobile()?CH[chI].photos:null;
+    if(key!==was){was=key;if(key){if(key!==cur)build(key);showAt=n+(reduce?0:1000);measure()}}
+    const pin=key&&MAP.pin(key);let on=!!(pin&&pin.vis&&n>=showAt);
+    if(on){const G=78,L=pin.sx-G-(lpR+28),Rt=innerWidth-20-(pin.sx+G),left=L>=Rt,space=Math.max(L,Rt),top=74,avail=innerHeight-top-18;
+      const s=Math.min(1,space/CW,avail/CH_);
+      if(s<.5)on=false;else{const x=left?pin.sx-G-CW*s:pin.sx+G,y=clamp(pin.sy-CH_*s*.42,top,innerHeight-18-CH_*s);
+        cl.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px) scale(${s.toFixed(3)})`;
+        const ax=left?x+CW*s-6*s:x+6*s,ay=y+96*s,dx=pin.sx-ax,dy=pin.sy-ay;
+        lead.style.width=Math.hypot(dx,dy).toFixed(1)+'px';lead.style.transform=`translate(${ax.toFixed(1)}px,${ay.toFixed(1)}px) rotate(${Math.atan2(dy,dx)}rad)`}}
+    if(root.classList.contains('on')!==on)root.classList.toggle('on',on)};
+})();
 $('#home').onclick=e=>{e.preventDefault();goCh(0)};
 /* walk by wheel, swipe or keys, without scrolling the page */
 let wheelLock=0,acc=0;
 addEventListener('wheel',e=>{if(e.target.closest('.panel')||mode!=='walk'||$('dialog[open]'))return;e.preventDefault();acc+=e.deltaY;const n=performance.now();if(n<wheelLock)return;if(Math.abs(acc)>40){goCh(chI+(acc>0?1:-1));acc=0;wheelLock=n+1100}},{passive:false});
-let ty0=null;addEventListener('touchstart',e=>{if(!e.target.closest('.panel'))ty0=e.touches[0].clientY},{passive:true});
+let ty0=null;addEventListener('touchstart',e=>{if(!e.target.closest('.panel,dialog'))ty0=e.touches[0].clientY},{passive:true});
 addEventListener('touchend',e=>{if(ty0==null||mode!=='walk')return;const dy=ty0-e.changedTouches[0].clientY;ty0=null;if(Math.abs(dy)>45)goCh(chI+(dy>0?1:-1))},{passive:true});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('dialog[open]')&&!rp.classList.contains('off')){$('#rpX').onclick();return}
   if(e.target.closest('input,textarea,select,.rp')||mode!=='walk'||$('dialog[open]'))return;if(['ArrowDown','ArrowRight','PageDown'].includes(e.key)){e.preventDefault();goCh(chI+1)}if(['ArrowUp','ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();goCh(chI-1)}});
