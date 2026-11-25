@@ -1019,7 +1019,7 @@ function resetAsk(){token++;lastRun=null;$('#ans').hidden=true;$('#ask').classLi
   MAP.clear();MAP.badges({});if(rpView==='receipts')closeRP(true)}
 
 /* the demo types a question, then waits for the visitor to press Ask */
-async function demo(){if(demoed||touched)return;demoed=true;await sleep(900);const q=QX.check;qin.value='';
+async function demo(){if(demoed||touched)return;demoed=true;await sleep(900);if(touched||mode!=='ask')return;const q=QX.check;qin.value='';
   for(const ch of q.q){if(touched||mode!=='ask')return;qin.value+=ch;if(!reduce)await sleep(30)}
   if(!touched&&mode==='ask'){$$('#qchips button').forEach(x=>x.classList.toggle('on',x.dataset.q==='check'));nudge(true)}}
 qin.addEventListener('pointerdown',()=>{touched=true});
